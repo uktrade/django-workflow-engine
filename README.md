@@ -31,14 +31,6 @@ MyWorkflow = Workflow(
     ],
 )
 ```
-from workflow.dataclasses import Step, Workflow
-
-
-ApprovalWorkflow = Workflow(
-name="approval_workflow",
-steps=[
-Step(
-
 
 ## Dependencies
 
