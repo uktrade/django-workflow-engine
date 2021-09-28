@@ -1,0 +1,130 @@
+{% extends 'base.html' %} {% block main_content %}
+<h1 class="govuk-heading-l">{{ object.get_workflow_name_display }} - {{ object.flow_name }}</h1>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      Started
+    </dt>
+    <dd class="govuk-summary-list__value">
+      {{ object.started }}
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      Started by
+    </dt>
+    <dd class="govuk-summary-list__value">
+      {{ object.executed_by.get_full_name }}
+    </dd>
+  </div>
+  {% if object.finished %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Finished?
+        </dt>
+        <dd class="govuk-summary-list__value">
+          {{ object.finished }}
+        </dd>
+      </div>
+  {% else %}
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      Status
+    </dt>
+    <dd class="govuk-summary-list__value">
+      {{ object.nice_name }}
+    </dd>
+  </div>
+  {% endif %}
+</dl>
+
+{% if object.current_task_record and not task.auto %}
+<a class="govuk-button" href="{% url 'flow-continue' object.pk %}">Continue</a>
+{% endif %}
+
+<div id="cy" style="height: 2000px; border"></div>
+{% endblock %} {% block script %}
+<script>
+  fetch("{% url 'flow-diagram' object.pk %}")
+    .then((response) => response.json())
+    .then((json) => {
+      const cy = Workflow.main.cytoscape({
+        container: document.getElementById("cy"),
+        elements: json.elements,
+        userZoomingEnabled: false,
+        style: [
+          {
+            selector: "node",
+            style: {
+              "background-color": "#fff",
+              "border-width": "2px",
+              "border-style": "solid",
+              "border-color": "black",
+              shape: 'roundrectangle',
+              width: '234px',
+              height: '60px',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              label: "data(label)",
+            },
+          },
+          {
+            selector: "edge",
+            style: {
+              width: 3,
+              "line-color": "black",
+              "target-arrow-color": "black",
+              "target-arrow-shape": "triangle",
+              "arrow-scale": 2,
+              "curve-style": "bezier",
+            },
+          },
+          {
+            selector: "node[?start]",
+            style: {
+              "background-color": "#5694ca",
+              "color": "white",
+            },
+          },
+          {
+            selector: "node[?end][?done]",
+            style: {
+              "background-color": "#00703c",
+              "color": "white",
+            },
+          },
+          {
+            selector: "node[?decision]",
+            style: {
+              shape: 'diamond',
+              height: '100px',
+            },
+          },
+          {
+            selector: "node[?done][!start][!end]",
+            style: {
+              "background-color": "lightgray",
+            },
+          },
+          {
+            selector: "node[?current]",
+            style: {
+              "border-width": "4px",
+                "background-color": "#f47738",
+                "color": "white",
+            },
+          }
+        ],
+        layout: {
+          name: 'breadthfirst',
+          // directed: true,
+          roots: ["create_requirement"],
+          // fit: false,
+          spacingFactor: 1,
+          padding: 0,
+          // nodeDimensionsIncludeLabels: true,
+        },
+      });
+    });
+</script>
+{% endblock %}
