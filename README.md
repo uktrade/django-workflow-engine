@@ -17,6 +17,15 @@ INSTALLED_APPS = [
 ]
 ```
 
+Add the built-in `django-workflow` view urls to your project's `urls.py`:
+
+```python
+urlpatterns = [
+    ...
+    path('dwflow/', include('django_workflow.urls')),
+]
+```
+
 ## Building your first workflow
 
 ```python
