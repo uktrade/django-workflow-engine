@@ -1,10 +1,10 @@
 <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">
-            Project name/title of role
+            Workflows
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ requirement.get_workflow_name_display }} - {{ requirement.flow_name }}
+            {{ flow.get_workflow_name_display }} - {{ flow.flow_name }}
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -12,7 +12,7 @@
             Current state
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ requirement.nice_name }}
+            {{ flow.nice_name }}
         </dd>
     </div>
     <div class="govuk-summary-list__row">
@@ -20,16 +20,16 @@
             Started by
         </dt>
         <dd class="govuk-summary-list__value">
-            {{ requirement.executed_by }}
+            {{ flow.executed_by }}
         </dd>
     </div>
-    {% if requirement.started %}
+    {% if flow.started %}
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
                 Started at
             </dt>
             <dd class="govuk-summary-list__value">
-                {{ requirement.started|default_if_none:"" }}
+                {{ flow.started|default_if_none:"" }}
             </dd>
         </div>
     {% endif %}

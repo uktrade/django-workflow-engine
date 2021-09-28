@@ -1,12 +1,10 @@
-{% extends 'base.html' %}
-
 {% block main_content %}
 <h1 class="govuk-heading-l">Configurable workflow demonstration</h1>
 <a class="govuk-button" href="{% url 'flow-create' %}">Create flow</a>
 <ul class="govuk-list">
     {% for flow in object_list %}
         <li>
-            {% include "includes/requirement_summary.html" with requirement=flow %}
+            {% include "includes/requirement_summary.html" with flow=flow %}
             <form action="{% url "flow-delete" flow.pk %}" method="POST">
             {% csrf_token %}
             {% if flow.on_manual_step or not flow.is_complete %}
