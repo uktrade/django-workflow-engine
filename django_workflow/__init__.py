@@ -6,6 +6,10 @@ custom workflow e.g:
 # I want to build my workflow
 from django_workflow import Step, Workflow
 
+# I want to execute my workflow
+from django_workflow import WorkflowExecutor
+from django_workflow import WorkflowError, WorkflowNotAuthError
+
 # I want to derive from base Task
 from django_workflow.tasks import Task
 
