@@ -19,3 +19,6 @@ from django_workflow.tasks import SendEmail, EmailFormTask, TaskError
 from .framework import Step
 from .framework import Workflow
 from .framework import tasks
+from .framework import WorkflowExecutor
+from .framework import WorkflowError
+from .framework import WorkflowNotAuthError
