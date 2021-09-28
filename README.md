@@ -17,6 +17,29 @@ INSTALLED_APPS = [
 ]
 ```
 
+## Building your first workflow
+
+```python
+from django_workflow import Step, Workflow
+
+MyWorkflow = Workflow(
+    name="my_workflow",
+    steps=[
+        Step(...),
+        Step(...),
+        Step(...),        
+    ],
+)
+```
+from workflow.dataclasses import Step, Workflow
+
+
+ApprovalWorkflow = Workflow(
+name="approval_workflow",
+steps=[
+Step(
+
+
 ## Dependencies
 
 ## Settings
