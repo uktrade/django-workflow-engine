@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-import views as workflow_views
+import django_workflow.views as workflow_views
 
 
 urlpatterns = [

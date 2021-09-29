@@ -5,10 +5,10 @@ from django.shortcuts import reverse
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from . import ImproperlyConfigured
+from django_workflow.exceptions import WorkflowImproperlyConfigured
 
 if not settings.DJANGO_WORKFLOWS:
-    raise ImproperlyConfigured("Add DJANGO_WORKFLOWS to your settings")
+    raise WorkflowImproperlyConfigured("Add DJANGO_WORKFLOWS to your settings")
 
 
 class Flow(models.Model):
