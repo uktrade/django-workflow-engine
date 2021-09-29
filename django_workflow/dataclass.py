@@ -5,7 +5,7 @@ Dataclasses that are used to define a custom workflow and its steps.
 from dataclasses import dataclass, field
 from typing import Optional
 
-from tasks import Task
+from .tasks import Task
 
 
 @dataclass
