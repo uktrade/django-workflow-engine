@@ -22,3 +22,7 @@ from .framework import tasks
 from .framework import WorkflowExecutor
 from .framework import WorkflowError
 from .framework import WorkflowNotAuthError
+
+
+class ImproperlyConfigured(Exception):
+    pass

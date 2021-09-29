@@ -22,23 +22,47 @@ Add the built-in `django-workflow` view urls to your project's `urls.py`:
 ```python
 urlpatterns = [
     ...
-    path('dwflow/', include('django_workflow.urls')),
+    path('flow/', include('django_workflow.urls')),
 ]
 ```
 
 ## Building your first workflow
 
+Create a `workflow.py` in your project and add your uniquely named workflows.
+
 ```python
 from django_workflow import Step, Workflow
 
-MyWorkflow = Workflow(
-    name="my_workflow",
+Onboard_Contractor = Workflow(
+    name="onboard_contractor",
     steps=[
         Step(...),
         Step(...),
-        Step(...),        
+        Step(...),
     ],
 )
+
+Onboard_Perm = Workflow(
+    name="onboard_perm",
+    steps=[
+        ...
+    ],
+)
+```
+
+Add you workflows to your Django settings as follows:
+
+```python
+DJANGO_WORKFLOWS = {
+    "onboard_contractor": Onboard_Contractor,
+    "onboard_perm": Onboard_Perm,
+}
+```
+
+Finally, inform the workflow engine of the site domain
+> (DC: don't like - use Django Sites?)
+```python
+DJANGO_WORKFLOWS_SITE = f"https://{ALLOWED_HOSTS[0]}"
 ```
 
 ## Dependencies
