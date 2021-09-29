@@ -59,6 +59,12 @@ DJANGO_WORKFLOWS = {
 }
 ```
 
+Run the `django_workflow` migrations:
+
+```bash
+$ ./manage.py migrate
+```
+
 Finally, inform the workflow engine of the site domain
 > (DC: don't like - use Django Sites?)
 ```python
