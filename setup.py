@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="django-workflow-engine",
-    version="0.0.1",
+    version="0.0.2",
     packages=setuptools.find_packages(),
     author="DIT Live Service Team",
     author_email="live.services@digital.trade.gov.uk",
