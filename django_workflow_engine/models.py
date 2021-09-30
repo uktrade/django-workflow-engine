@@ -69,7 +69,7 @@ class Flow(models.Model):
 
     @property
     def continue_url(self):
-        return settings.DJANGO_WORKFLOWS_SITE + reverse("flow-continue", args=[self.pk])
+        return reverse("flow-continue", args=[self.pk])
 
 
 class TaskRecord(models.Model):

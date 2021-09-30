@@ -65,12 +65,6 @@ Finally, run the `django_workflow` migrations:
 $ ./manage.py migrate
 ```
 
-Finally, inform the workflow engine of the site domain
-> (DC: don't like - use Django Sites?)
-```python
-DJANGO_WORKFLOWS_SITE = f"https://{ALLOWED_HOSTS[0]}"
-```
-
 ## Dependencies
 
 ## Settings
