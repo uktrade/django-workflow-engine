@@ -12,7 +12,7 @@ setup(
     packages=setuptools.find_packages(),
     author="DIT Live Service Team",
     author_email="live.services@digital.trade.gov.uk",
-    url="https://github.com/uktrade/django-workflow",
+    url="https://github.com/uktrade/django-workflow-engine",
     description="Lightweight, reusable workflow engine for Django applications",
     long_description=long_description,
     long_description_content_type="text/markdown",
