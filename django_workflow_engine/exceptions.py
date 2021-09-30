@@ -1,4 +1,4 @@
-"""django_workflow exceptions."""
+"""django_workflow_engine exceptions."""
 
 
 class WorkflowImproperlyConfigured(Exception):

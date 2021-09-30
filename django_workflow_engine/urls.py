@@ -1,8 +1,8 @@
-"""django_workflow package urls."""
+"""django_workflow_engine package urls."""
 
 from django.urls import path
 
-import django_workflow.views as workflow_views
+import django_workflow_engine.views as workflow_views
 
 
 urlpatterns = [

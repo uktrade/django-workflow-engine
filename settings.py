@@ -1,6 +1,6 @@
-"""Django settings for django_workflow.
+"""Django settings for django_workflow_engine.
 
-NB: This is a minimal settings module and is only for django_workflow migration
+NB: This is a minimal settings module and is only for django_workflow_engine migration
 creation, do not try to serve a site using this configuration.
 """
 from pathlib import Path
@@ -24,7 +24,7 @@ DJANGO_WORKFLOWS = {
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django_workflow',
+    'django_workflow_engine',
 ]
 
 MIDDLEWARE = []

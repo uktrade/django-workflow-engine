@@ -1,4 +1,4 @@
-"""django_workflow package framework dataclasses.
+"""django_workflow_engine package framework dataclasses.
 
 Dataclasses that are used to define a custom workflow and its steps.
 """

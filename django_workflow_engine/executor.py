@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from .exceptions import WorkflowError, WorkflowNotAuthError
-from django_workflow.models import TaskRecord
+from django_workflow_engine.models import TaskRecord
 
 
 class WorkflowExecutor:

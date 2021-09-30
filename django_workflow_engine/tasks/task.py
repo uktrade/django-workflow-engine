@@ -1,6 +1,6 @@
 """Django workflow Task.
 
-A task is an instance of a django_workflow.dataclasses.Step
+A task is an instance of a django_workflow_engine.dataclasses.Step
 """
 
 

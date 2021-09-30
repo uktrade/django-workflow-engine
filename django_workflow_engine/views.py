@@ -11,11 +11,11 @@ from django.views.generic.edit import DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 
-from django_workflow.forms import GovFormattedModelForm
-from django_workflow.tasks import TaskError
-from django_workflow.exceptions import WorkflowNotAuthError
-from django_workflow.executor import WorkflowExecutor
-from django_workflow.models import Flow, TaskRecord
+from django_workflow_engine.forms import GovFormattedModelForm
+from django_workflow_engine.tasks import TaskError
+from django_workflow_engine.exceptions import WorkflowNotAuthError
+from django_workflow_engine.executor import WorkflowExecutor
+from django_workflow_engine.models import Flow, TaskRecord
 
 logger = logging.getLogger(__name__)
 

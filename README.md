@@ -13,7 +13,7 @@ Add the application to your Django settings `INSTALLED_APPS` list:
 ```python
 INSTALLED_APPS = [
     ...
-    "django_workflow",
+    "django_workflow_engine",
 ]
 ```
 
@@ -22,7 +22,7 @@ Add the built-in `django-workflow` view urls to your project's `urls.py`:
 ```python
 urlpatterns = [
     ...
-    path('flow/', include('django_workflow.urls')),
+    path('flow/', include('django_workflow_engine.urls')),
 ]
 ```
 
@@ -31,7 +31,7 @@ urlpatterns = [
 Create a `workflow.py` in your project and add your uniquely named workflows.
 
 ```python
-from django_workflow import Step, Workflow
+from django_workflow_engine import Step, Workflow
 
 Onboard_Contractor = Workflow(
     name="onboard_contractor",
@@ -59,7 +59,7 @@ DJANGO_WORKFLOWS = {
 }
 ```
 
-Run the `django_workflow` migrations:
+Finally, run the `django_workflow` migrations:
 
 ```bash
 $ ./manage.py migrate
