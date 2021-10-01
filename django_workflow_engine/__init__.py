@@ -15,6 +15,9 @@ from django_workflow_engine.tasks import Task
 # I want to use some built-in tasks
 from django_workflow_engine.tasks import SendEmail, EmailFormTask, TaskError
 """
+# Workflow url generation
+from .generate_urls import workflow_urls
+
 # Workflow definition
 from .dataclass import Step
 from .dataclass import Workflow
