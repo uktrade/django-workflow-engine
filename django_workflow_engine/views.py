@@ -2,6 +2,7 @@ import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django import forms
 from django.shortcuts import render, reverse, redirect
 from django.urls import reverse_lazy
 from django.http import JsonResponse, Http404
@@ -11,7 +12,6 @@ from django.views.generic.edit import DeleteView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 
-from django_workflow_engine.forms import GovFormattedModelForm
 from django_workflow_engine.tasks import TaskError
 from django_workflow_engine.exceptions import WorkflowNotAuthError
 from django_workflow_engine.executor import WorkflowExecutor
@@ -30,7 +30,7 @@ class FlowView(LoginRequiredMixin, DetailView):
     model = Flow
 
 
-class FlowCreateForm(GovFormattedModelForm):
+class FlowCreateForm(forms.ModelForm):
     class Meta:
         model = Flow
         fields = ["flow_name", "workflow_name"]
@@ -54,11 +54,6 @@ class FlowCreateView(LoginRequiredMixin, CreateView):
             logger.warning(f"{e}")
             raise PermissionDenied(f"{e}")
         return response
-
-
-class FlowDeleteView(LoginRequiredMixin, DeleteView):
-    model = Flow
-    success_url = reverse_lazy('flow-list')
 
 
 class FlowContinueView(LoginRequiredMixin, View):
