@@ -1,9 +1,6 @@
-{% extends 'base.html' %}
-
 {% block main_content %}
 <form method="post">
     {% csrf_token %}
-    {% include 'includes/govt_uk_form.html' %}
-    <button class="govuk-button">Start</button>
+    <button>Start</button>
 </form>
 {% endblock %}

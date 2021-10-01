@@ -1,26 +1,26 @@
 {% block main_content %}
-<h1 class="govuk-heading-l">Configurable workflow demonstration</h1>
-<a class="govuk-button" href="{% url 'flow-create' %}">Create flow</a>
-<ul class="govuk-list">
+<h1>Configurable workflow demonstration</h1>
+<a href="{% url 'flow-create' %}">Create flow</a>
+<ul>
     {% for flow in object_list %}
         <li>
             {% include "includes/requirement_summary.html" with flow=flow %}
             <form action="{% url "flow-delete" flow.pk %}" method="POST">
             {% csrf_token %}
             {% if flow.on_manual_step or not flow.is_complete %}
-                <a class="govuk-button" data-module="govuk-button" href="{% url "flow-continue" flow.pk %}">Progress requirement</a>
+                <a href="{% url "flow-continue" flow.pk %}">Progress requirement</a>
             {% else %}
-                <a class="govuk-button govuk-button--secondary" data-module="govuk-button" href="{% url "flow" flow.pk %}">View requirement</a>
+                <a href="{% url "flow" flow.pk %}">View requirement</a>
             {% endif %}
-                <button class="govuk-button govuk-button--warning" data-module="govuk-button">
+                <button>
                     Delete requirement
                 </button>
             </form>
         </li>
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+        <hr>
         {% empty %}
         <li>
-            <p class="govuk-body">
+            <p>
                 No workflows yet.
             </p>
         </li>

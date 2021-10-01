@@ -1,34 +1,34 @@
-<dl class="govuk-summary-list">
-    <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">
+<dl>
+    <div>
+        <dt>
             Workflows
         </dt>
-        <dd class="govuk-summary-list__value">
+        <dd>
             {{ flow.get_workflow_name_display }} - {{ flow.flow_name }}
         </dd>
     </div>
-    <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">
+    <div>
+        <dt>
             Current state
         </dt>
-        <dd class="govuk-summary-list__value">
+        <dd>
             {{ flow.nice_name }}
         </dd>
     </div>
-    <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">
+    <div>
+        <dt>
             Started by
         </dt>
-        <dd class="govuk-summary-list__value">
+        <dd>
             {{ flow.executed_by }}
         </dd>
     </div>
     {% if flow.started %}
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key">
+        <div>
+            <dt>
                 Started at
             </dt>
-            <dd class="govuk-summary-list__value">
+            <dd>
                 {{ flow.started|default_if_none:"" }}
             </dd>
         </div>

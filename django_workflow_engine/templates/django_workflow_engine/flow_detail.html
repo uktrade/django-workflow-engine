@@ -1,37 +1,37 @@
-{% extends 'base.html' %} {% block main_content %}
-<h1 class="govuk-heading-l">{{ object.get_workflow_name_display }} - {{ object.flow_name }}</h1>
-<dl class="govuk-summary-list">
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">
+{% block main_content %}
+<h1>{{ object.get_workflow_name_display }} - {{ object.flow_name }}</h1>
+<dl>
+  <div>
+    <dt>
       Started
     </dt>
-    <dd class="govuk-summary-list__value">
+    <dd>
       {{ object.started }}
     </dd>
   </div>
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">
+  <div>
+    <dt>
       Started by
     </dt>
-    <dd class="govuk-summary-list__value">
+    <dd>
       {{ object.executed_by.get_full_name }}
     </dd>
   </div>
   {% if object.finished %}
-      <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">
+      <div>
+        <dt>
           Finished?
         </dt>
-        <dd class="govuk-summary-list__value">
+        <dd>
           {{ object.finished }}
         </dd>
       </div>
   {% else %}
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">
+  <div>
+    <dt>
       Status
     </dt>
-    <dd class="govuk-summary-list__value">
+    <dd>
       {{ object.nice_name }}
     </dd>
   </div>
@@ -39,7 +39,7 @@
 </dl>
 
 {% if object.current_task_record and not task.auto %}
-<a class="govuk-button" href="{% url 'flow-continue' object.pk %}">Continue</a>
+<a href="{% url 'flow-continue' object.pk %}">Continue</a>
 {% endif %}
 
 <div id="cy" style="height: 2000px; border"></div>
