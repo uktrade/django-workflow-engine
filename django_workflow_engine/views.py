@@ -105,7 +105,7 @@ class FlowContinueView(LoginRequiredMixin, View):
 
         context = self.get_context_data()
 
-        template = self.task.template or "workflow/flow-continue.html"
+        template = self.task.template or "django_workflow_engine/flow-continue.html"
 
         return render(request, template, context=context)
 
@@ -120,7 +120,7 @@ class FlowContinueView(LoginRequiredMixin, View):
             logger.warning(f"{e}")
             raise PermissionDenied(f"{e}")
         except TaskError as error:
-            template = self.task.template or "workflow/flow-continue.html"
+            template = self.task.template or "django_workflow_engine/flow-continue.html"
 
             context = self.get_context_data() | error.context
 
