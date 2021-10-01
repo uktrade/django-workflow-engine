@@ -1,5 +1,5 @@
 from django.conf import settings
 
 
-def test_run():
+def test_config():
     assert settings.DJANGO_WORKFLOWS

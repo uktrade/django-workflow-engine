@@ -22,7 +22,7 @@ Add the built-in `django-workflow` view urls to your project's `urls.py`:
 ```python
 urlpatterns = [
     ...
-    path('flow/', include('django_workflow_engine.urls')),
+    path("flow/", include("django_workflow_engine.urls")),
 ]
 ```
 
