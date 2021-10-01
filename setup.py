@@ -1,7 +1,4 @@
-from distutils.core import setup
-
-import setuptools
-
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -9,7 +6,8 @@ with open("README.md", "r") as fh:
 setup(
     name="django-workflow-engine",
     version="0.0.4",
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
+    include_package_data=True,
     author="DIT Live Service Team",
     author_email="live.services@digital.trade.gov.uk",
     url="https://github.com/uktrade/django-workflow-engine",
