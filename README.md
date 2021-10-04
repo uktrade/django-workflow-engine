@@ -1,11 +1,11 @@
-# django-workflow
+# django-workflow-engine
 `django-workflow` is a lightweight and reusable workflow engine for 
 Django applications. It enables you to better organise the business logic for 
 collaborating users.
 
 ## Installation
 
-    pip install django-workflow
+    pip install django-workflow-engine
 
 ## Getting started
 Add the application to your Django settings `INSTALLED_APPS` list:
@@ -17,13 +17,39 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add the built-in `django-workflow` view urls to your project's `urls.py`:
+Add the built-in `django-workflow-engine` view urls to your project's `urls.
+py` as 
+follows:
+
+
+```python
+from django_workflow_engine import workflow_urls
+...
+urlpatterns = [
+    path("workflow/", workflow_urls()),
+    ...
+]
+```
+
+This will utilise all `django-workflow-engine` built-in view classes. Default views are:
+- `list_view=FlowListView` List of workflow instances view.
+- `view=FlowView` Workflow instance view.
+- `create_view=FlowCreateView` Create workflow view.
+- `continue_view=FlowContinueView` Workflow continuation view.
+- `diagram_view=FlowDiagramView` Workflow diagram view.
+
+You can override any the built-in view classes with your own, for example to
+provide your own view classes for flow list and flow view:
 
 ```python
 urlpatterns = [
-    ...
-    path("flow/", include("django_workflow_engine.urls")),
-]
+        path("workflow/", 
+             workflow_urls(
+                 list_view=MyFlowListView,
+                 view=MyFlowView,
+            ),
+        ),
+    ]
 ```
 
 ## Building your first workflow
@@ -59,7 +85,7 @@ DJANGO_WORKFLOWS = {
 }
 ```
 
-Finally, run the `django_workflow` migrations:
+Finally, run the `django-workflow-engine` migrations:
 
 ```bash
 $ ./manage.py migrate
