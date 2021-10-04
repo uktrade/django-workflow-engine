@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django import forms
 from django.shortcuts import render, reverse, redirect
@@ -18,13 +17,13 @@ from django_workflow_engine.models import Flow, TaskRecord
 logger = logging.getLogger(__name__)
 
 
-class FlowListView(LoginRequiredMixin, ListView):
+class FlowListView(ListView):
     model = Flow
     paginate_by = 100  # if pagination is desired
     ordering = "-started"
 
 
-class FlowView(LoginRequiredMixin, DetailView):
+class FlowView(DetailView):
     model = Flow
 
 
@@ -34,7 +33,7 @@ class FlowCreateForm(forms.ModelForm):
         fields = ["flow_name", "workflow_name"]
 
 
-class FlowCreateView(LoginRequiredMixin, CreateView):
+class FlowCreateView(CreateView):
     model = Flow
     form_class = FlowCreateForm
 
@@ -54,7 +53,7 @@ class FlowCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
-class FlowContinueView(LoginRequiredMixin, View):
+class FlowContinueView(View):
 
     def __init__(self):
         super().__init__()
@@ -131,7 +130,7 @@ class FlowContinueView(LoginRequiredMixin, View):
         return context
 
 
-class FlowDiagramView(LoginRequiredMixin, View):
+class FlowDiagramView(View):
 
     @staticmethod
     def get(request, pk, **kwargs):
