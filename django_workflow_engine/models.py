@@ -12,14 +12,8 @@ if not settings.DJANGO_WORKFLOWS:
 
 
 class Flow(models.Model):
-    WORKFLOWS = [
-        (flow, flow.title().replace("_", " "))
-        for flow in settings.DJANGO_WORKFLOWS
-    ]
 
-    workflow_name = models.CharField(
-        "Select workflow", choices=WORKFLOWS, max_length=255
-    )
+    workflow_name = models.CharField("Select workflow", max_length=255)
     flow_name = models.CharField(
         "Select activity",
         max_length=255,
