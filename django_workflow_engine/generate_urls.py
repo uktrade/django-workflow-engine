@@ -1,9 +1,9 @@
 """django_workflow_engine package urls.
 
-Provides easy defaults or option to override some or all of the build in views,
+Provides easy defaults or option to override some or all of the built in views,
 for example in the client project's urls.py:
 
-    from django-workflow-engine import workflow_urls
+    from django_workflow_engine import workflow_urls
     ...
     urlpatterns = [
         # django-workflow-engine OTB view classes

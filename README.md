@@ -1,11 +1,11 @@
-# django-workflow
+# django-workflow-engine
 `django-workflow` is a lightweight and reusable workflow engine for 
 Django applications. It enables you to better organise the business logic for 
 collaborating users.
 
 ## Installation
 
-    pip install django-workflow
+    pip install django-workflow-engine
 
 ## Getting started
 Add the application to your Django settings `INSTALLED_APPS` list:
@@ -17,12 +17,13 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add the built-in `django-workflow` view urls to your project's `urls.py` as 
+Add the built-in `django-workflow-engine` view urls to your project's `urls.
+py` as 
 follows:
 
 
 ```python
-from django-workflow-engine import workflow_urls
+from django_workflow_engine import workflow_urls
 ...
 urlpatterns = [
     path("workflow/", workflow_urls()),
@@ -84,7 +85,7 @@ DJANGO_WORKFLOWS = {
 }
 ```
 
-Finally, run the `django_workflow` migrations:
+Finally, run the `django-workflow-engine` migrations:
 
 ```bash
 $ ./manage.py migrate
