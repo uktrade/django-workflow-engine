@@ -63,6 +63,6 @@ def workflow_urls(
             path("<int:pk>/", view.as_view(), name="flow"),
             path("<int:pk>/continue", continue_view.as_view(), name="flow-continue"),
             path("<int:pk>/diagram", diagram_view.as_view(), name="flow-diagram"),
-            path("<int:pk>/delete", diagram_view.as_view(), name="flow-delete"),
+            path("<int:pk>/delete", delete_view.as_view(), name="flow-delete"),
         ]
     )
