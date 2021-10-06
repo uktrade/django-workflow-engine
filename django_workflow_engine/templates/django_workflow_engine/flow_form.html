@@ -1,6 +1,7 @@
 {% block main_content %}
 <form method="post">
     {% csrf_token %}
+    {{ form.as_p }}
     <button>Start</button>
 </form>
 {% endblock %}
