@@ -94,6 +94,11 @@ Finally, run the `django-workflow-engine` migrations:
 $ ./manage.py migrate
 ```
 
+## Publishing
+
+1. `python setup.py sdist`
+2. `twine upload dist/*`
+
 ## Dependencies
 
 ## Settings

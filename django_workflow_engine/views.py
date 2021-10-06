@@ -1,19 +1,20 @@
 import logging
 
+from django import forms
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django import forms
-from django.shortcuts import render, reverse, redirect
-from django.http import JsonResponse, Http404
+from django.http import Http404, JsonResponse
+from django.shortcuts import redirect, render, reverse
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic.edit import CreateView
-from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.list import ListView
 
-from django_workflow_engine.tasks import TaskError
 from django_workflow_engine.exceptions import WorkflowNotAuthError
 from django_workflow_engine.executor import WorkflowExecutor
 from django_workflow_engine.models import Flow, TaskRecord
+from django_workflow_engine.tasks import TaskError
 from django_workflow_engine.utils import build_workflow_choices
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ class FlowView(DetailView):
 class FlowCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['workflow_name'] = forms.ChoiceField(
+        self.fields["workflow_name"] = forms.ChoiceField(
             choices=build_workflow_choices(settings.DJANGO_WORKFLOWS)
         )
 
@@ -61,8 +62,12 @@ class FlowCreateView(CreateView):
         return response
 
 
-class FlowContinueView(View):
+class FlowDeleteView(DeleteView):
+    model = Flow
+    success_url = reverse_lazy("flow-list")
 
+
+class FlowContinueView(View):
     def __init__(self):
         super().__init__()
         self.flow = None
@@ -139,7 +144,6 @@ class FlowContinueView(View):
 
 
 class FlowDiagramView(View):
-
     @staticmethod
     def get(request, pk, **kwargs):
         try:
