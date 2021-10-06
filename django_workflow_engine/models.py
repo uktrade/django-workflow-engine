@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from django_workflow_engine.exceptions import WorkflowImproperlyConfigured
+from django_workflow_engine.utils import lookup_workflow
 
 if not settings.DJANGO_WORKFLOWS:
     raise WorkflowImproperlyConfigured("Add DJANGO_WORKFLOWS to your settings")
@@ -33,7 +34,7 @@ class Flow(models.Model):
 
     @property
     def workflow(self):
-        return settings.DJANGO_WORKFLOWS[self.workflow_name]
+        return lookup_workflow(settings.DJANGO_WORKFLOWS, self.workflow_name)
 
     @property
     def current_task_record(self):

@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django import forms
 from django.shortcuts import render, reverse, redirect
@@ -13,6 +14,7 @@ from django_workflow_engine.tasks import TaskError
 from django_workflow_engine.exceptions import WorkflowNotAuthError
 from django_workflow_engine.executor import WorkflowExecutor
 from django_workflow_engine.models import Flow, TaskRecord
+from django_workflow_engine.utils import build_workflow_choices
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,12 @@ class FlowView(DetailView):
 
 
 class FlowCreateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['workflow_name'] = forms.ChoiceField(
+            choices=build_workflow_choices(settings.DJANGO_WORKFLOWS)
+        )
+
     class Meta:
         model = Flow
         fields = ["flow_name", "workflow_name"]

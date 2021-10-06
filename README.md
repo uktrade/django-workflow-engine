@@ -79,11 +79,14 @@ Onboard_Perm = Workflow(
 Add you workflows to your Django settings as follows:
 
 ```python
-DJANGO_WORKFLOWS = {
-    "onboard_contractor": Onboard_Contractor,
-    "onboard_perm": Onboard_Perm,
-}
+DJANGO_WORKFLOWS = [
+    "workflows.onboard_contractor.OnboardContractor",
+    "workflows.onboard_perm.OnboardPerm",
+]
 ```
+
+Each entry needs to be a valid module path where the final component is the 
+name of your workflow class.  
 
 Finally, run the `django-workflow-engine` migrations:
 
