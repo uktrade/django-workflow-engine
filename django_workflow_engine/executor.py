@@ -93,14 +93,18 @@ class WorkflowExecutor:
 
     @staticmethod
     def check_authorised(user, step):
-        """Check user is authorised.
+        """Check if a user is authorised to execute a workflow step.
 
-        Check that a user is authorised to execute a workflow step.
+        If no groups are defined on the step, the check will pass and permission will be
+        granted.
 
         :param (User) user: Workflow user.
         :param (Step) step: Flow step.
         :raises (WorkflowNotAuthError): If user is not authorised.
         """
+        if not step.groups:
+            return
+
         user_groups = set(g.name for g in user.groups.all())
         required_groups = set(step.groups)
         if user_groups.intersection(required_groups):

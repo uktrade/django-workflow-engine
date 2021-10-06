@@ -38,7 +38,7 @@ class FlowCreateForm(forms.ModelForm):
 
     class Meta:
         model = Flow
-        fields = ["flow_name", "workflow_name"]
+        fields = ["workflow_name", "flow_name"]
 
 
 class FlowCreateView(CreateView):
