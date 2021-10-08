@@ -43,12 +43,16 @@
 {% endif %}
 
 <div id="cy" style="height: 2000px; border"></div>
-{% endblock %} {% block script %}
-<script>
+{% endblock %}
+
+{% block script %}
+<script type="module">
+  import cytoscape from 'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.19.1/cytoscape.esm.min.js';
+
   fetch("{% url 'flow-diagram' object.pk %}")
     .then((response) => response.json())
     .then((json) => {
-      const cy = Workflow.main.cytoscape({
+      const cy = cytoscape({
         container: document.getElementById("cy"),
         elements: json.elements,
         userZoomingEnabled: false,
