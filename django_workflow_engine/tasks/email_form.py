@@ -10,9 +10,10 @@ class EmailForm(forms.Form):
     recipient_list = forms.CharField()
 
 
-class EmailFormTask(Task, input="email_form"):
+class EmailFormTask(Task):
     auto = False
     form = EmailForm
+    task_name = "email_form"
 
     def execute(self, task_info):
         form = self.form(task_info)

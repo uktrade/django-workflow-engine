@@ -4,8 +4,9 @@ from django.template import Context, Template
 from .task import Task
 
 
-class SendEmail(Task, input="send_email"):
+class SendEmail(Task):
     auto = True
+    task_name = "send_email"
 
     def execute(self, task_info):
         email_info = self.task_record.task_info | task_info
