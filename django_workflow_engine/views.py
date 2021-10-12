@@ -76,8 +76,9 @@ class FlowContinueView(View):
         self.step = None
         self.task = None
 
-    def set_cannot_view_step_url(self):
-        self.cannot_view_step_url = reverse_lazy(
+    def get_cannot_view_step_url(self):
+        print("base class call")
+        return reverse_lazy(
             "flow",
             args=[self.flow.pk],
         )
@@ -92,7 +93,7 @@ class FlowContinueView(View):
             )
 
             # Check user can view step
-            self.set_cannot_view_step_url()
+            self.cannot_view_step_url = self.get_cannot_view_step_url()
 
             try:
                 WorkflowExecutor.check_authorised(
