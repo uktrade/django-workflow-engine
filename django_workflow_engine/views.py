@@ -68,7 +68,7 @@ class FlowDeleteView(DeleteView):
 
 
 class FlowContinueView(View):
-    cannot_view_step_url = reverse_lazy("flow", args=[self.flow.pk])
+    cannot_view_step_url = None
 
     def __init__(self):
         super().__init__()
@@ -79,6 +79,8 @@ class FlowContinueView(View):
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.flow = Flow.objects.get(pk=kwargs.get("pk"))
+
+        self.cannot_view_step_url = reverse_lazy("flow", args=[self.flow.pk])
 
         if self.flow.current_task_record:
             self.step = self.flow.workflow.get_step(
