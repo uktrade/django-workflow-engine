@@ -104,18 +104,10 @@ class WorkflowExecutor:
         :param (Step) step: Flow step.
         :raises (WorkflowNotAuthError): If user is not authorised.
         """
-        print("step.groups")
-        print(step.groups)
-
         if not step.groups:
             return
 
-        user_groups = set(g.name for g in user.groups.all())
-
-        print(user_groups)
-
-        required_groups = set(step.groups)
-        if user_groups.intersection(required_groups):
+        if user.groups.filter(name__in=step.groups).exists()
             return
         msg = (
             f"User '{user}' is not authorised to execute the "
