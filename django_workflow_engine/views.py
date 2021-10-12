@@ -94,7 +94,7 @@ class FlowContinueView(View):
                     self.step,
                 )
             except WorkflowNotAuthError:
-                redirect(self.cannot_view_url)
+                redirect(self.cannot_view_step_url)
 
             self.task = self.step.task(
                 request.user, self.flow.current_task_record, self.flow
