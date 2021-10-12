@@ -89,6 +89,7 @@ class WorkflowExecutor:
             current_step = flow.workflow.first_step
             flow.started = timezone.now()
             flow.save()
+
         return current_step
 
     @staticmethod

@@ -74,6 +74,9 @@ class FlowContinueView(View):
         self.step = None
         self.task = None
 
+    def cannot_view_step_url(self):
+        return reverse_lazy("flow", args=[self.flow.pk])
+
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.flow = Flow.objects.get(pk=kwargs.get("pk"))
@@ -82,6 +85,16 @@ class FlowContinueView(View):
             self.step = self.flow.workflow.get_step(
                 self.flow.current_task_record.step_id
             )
+
+            # Check user can view step
+            try:
+                self.flow.workflow.check_authorised(
+                    request.user,
+                    self.step,
+                )
+            except WorkflowNotAuthError:
+                redirect(self.cannot_view_url)
+
             self.task = self.step.task(
                 request.user, self.flow.current_task_record, self.flow
             )
