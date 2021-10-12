@@ -107,7 +107,7 @@ class WorkflowExecutor:
         if not step.groups:
             return
 
-        if user.groups.filter(name__in=step.groups).exists()
+        if user.groups.filter(name__in=step.groups).exists():
             return
         msg = (
             f"User '{user}' is not authorised to execute the "
