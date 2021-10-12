@@ -1,0 +1,87 @@
+<div id="{{ diagram_id|default:'flow-diagram' }}"></div>
+
+<script type="module">
+  import cytoscape from "https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.19.1/cytoscape.esm.min.js";
+
+  fetch("{% url 'flow-diagram' object.pk %}")
+    .then((response) => response.json())
+    .then((json) => {
+      const cy = cytoscape({
+        container: document.getElementById("{{ diagram_id|default:'flow-diagram' }}"),
+        elements: json.elements,
+        userZoomingEnabled: false,
+        style: [
+          {
+            selector: "node",
+            style: {
+              "background-color": "#fff",
+              "border-width": "2px",
+              "border-style": "solid",
+              "border-color": "black",
+              shape: "roundrectangle",
+              width: "234px",
+              height: "60px",
+              "text-valign": "center",
+              "text-halign": "center",
+              label: "data(label)",
+            },
+          },
+          {
+            selector: "edge",
+            style: {
+              width: 3,
+              "line-color": "black",
+              "target-arrow-color": "black",
+              "target-arrow-shape": "triangle",
+              "arrow-scale": 2,
+              "curve-style": "bezier",
+            },
+          },
+          {
+            selector: "node[?start]",
+            style: {
+              "background-color": "#5694ca",
+              "color": "white",
+            },
+          },
+          {
+            selector: "node[?end][?done]",
+            style: {
+              "background-color": "#00703c",
+              "color": "white",
+            },
+          },
+          {
+            selector: "node[?decision]",
+            style: {
+              shape: "diamond",
+              height: "100px",
+            },
+          },
+          {
+            selector: "node[?done][!start][!end]",
+            style: {
+              "background-color": "lightgray",
+            },
+          },
+          {
+            selector: "node[?current]",
+            style: {
+              "border-width": "4px",
+                "background-color": "#f47738",
+                "color": "white",
+            },
+          }
+        ],
+        layout: {
+          name: "breadthfirst",
+          // directed: true,
+          roots: ["create_requirement"],
+          // fit: false,
+          spacingFactor: 1,
+          padding: 0,
+          // nodeDimensionsIncludeLabels: true,
+        },
+      });
+    });
+</script>
