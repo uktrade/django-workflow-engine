@@ -80,7 +80,10 @@ class FlowContinueView(View):
         super().setup(request, *args, **kwargs)
         self.flow = Flow.objects.get(pk=kwargs.get("pk"))
 
-        self.cannot_view_step_url = reverse_lazy("flow", args=[self.flow.pk])
+        self.cannot_view_step_url = reverse_lazy(
+            "flow",
+            args=[self.flow.pk],
+        )
 
         if self.flow.current_task_record:
             self.step = self.flow.workflow.get_step(

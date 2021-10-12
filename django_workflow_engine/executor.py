@@ -27,6 +27,7 @@ class WorkflowExecutor:
             raise WorkflowError("Flow already started")
 
         current_step = self.get_current_step(self.flow, task_uuid)
+
         while current_step:
             task_record, created = TaskRecord.objects.get_or_create(
                 flow=self.flow,
@@ -103,10 +104,16 @@ class WorkflowExecutor:
         :param (Step) step: Flow step.
         :raises (WorkflowNotAuthError): If user is not authorised.
         """
+        print("step.groups")
+        print(step.groups)
+
         if not step.groups:
             return
 
         user_groups = set(g.name for g in user.groups.all())
+
+        print(user_groups)
+
         required_groups = set(step.groups)
         if user_groups.intersection(required_groups):
             return
