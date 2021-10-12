@@ -88,7 +88,7 @@ class FlowContinueView(View):
 
             # Check user can view step
             try:
-                self.flow.workflow.check_authorised(
+                WorkflowExecutor.check_authorised(
                     request.user,
                     self.step,
                 )
