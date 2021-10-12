@@ -76,14 +76,15 @@ class FlowContinueView(View):
         self.step = None
         self.task = None
 
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
-        self.flow = Flow.objects.get(pk=kwargs.get("pk"))
-
+    def set_cannot_view_step_url(self):
         self.cannot_view_step_url = reverse_lazy(
             "flow",
             args=[self.flow.pk],
         )
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.flow = Flow.objects.get(pk=kwargs.get("pk"))
 
         if self.flow.current_task_record:
             self.step = self.flow.workflow.get_step(
@@ -91,6 +92,8 @@ class FlowContinueView(View):
             )
 
             # Check user can view step
+            self.set_cannot_view_step_url()
+
             try:
                 WorkflowExecutor.check_authorised(
                     request.user,
