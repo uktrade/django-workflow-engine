@@ -98,6 +98,7 @@ class FlowContinueView(View):
             print("self.cannot_view_step_url")
             print(self.cannot_view_step_url)
 
+            # Check user has permission to perform this task
             try:
                 WorkflowExecutor.check_authorised(
                     request.user,
@@ -143,7 +144,7 @@ class FlowContinueView(View):
         executor = WorkflowExecutor(self.flow)
         try:
             executor.run_flow(
-                user=self.request.user, task_info=self.request.POST, task_uuid=task_uuid
+                user=self.request.user, task_info=self.request.POST, task_uuids=[task_uuid,]
             )
         except WorkflowNotAuthError as e:
             logger.warning(f"{e}")

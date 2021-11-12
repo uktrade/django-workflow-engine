@@ -1,14 +1,19 @@
+import logging
+
 from django.utils import timezone
 
 from .exceptions import WorkflowError, WorkflowNotAuthError
 from django_workflow_engine.models import TaskRecord
 
 
+logger = logging.getLogger(__name__)
+
+
 class WorkflowExecutor:
     def __init__(self, flow):
         self.flow = flow
 
-    def run_flow(self, user, task_info=None, task_uuid=None):
+    def run_flow(self, user, task_info=None, task_uuids=None):
         """Run the workflow.
 
         We identify the current step and execute workflow steps until a manual
@@ -23,48 +28,50 @@ class WorkflowExecutor:
             task_info = {}
 
         # TODO: might be a race condition
-        if self.flow.started and not task_uuid:
+        if self.flow.started and not task_uuids:
             raise WorkflowError("Flow already started")
 
-        current_step = self.get_current_step(self.flow, task_uuid)
+        current_steps = self.get_current_step(self.flow, task_uuids)
 
-        while current_step:
-            task_record, created = TaskRecord.objects.get_or_create(
-                flow=self.flow,
-                task_name=current_step.task_name,
-                step_id=current_step.step_id,
-                executed_by=None,
-                finished_at=None,
-                defaults={"task_info": current_step.task_info or {}},
-            )
+        for current_step in current_steps:
+            while current_step:
+                task_record, created = TaskRecord.objects.get_or_create(
+                    flow=self.flow,
+                    task_name=current_step.task_name,
+                    step_id=current_step.step_id,
+                    executed_by=None,
+                    finished_at=None,
+                    defaults={"task_info": current_step.task_info or {}},
+                )
 
-            task = current_step.task(user, task_record, self.flow)
+                task = current_step.task(user, task_record, self.flow)
 
-            task.setup(task_info)
+                task.setup(task_info)
 
-            # the next task has a manual step
-            if not task.auto and created:
-                return task_record
+                # the next task has a manual step
+                if not task.auto and created:
+                    return task_record
 
-            self.check_authorised(user, current_step)  # Raises if user not authorised for step
-            target, task_output = task.execute(task_info)
+                self.check_authorised(user, current_step)  # Raises if user not authorised for step
 
-            # TODO: check target against step target
+                target, task_output = task.execute(task_info)
 
-            task_record.finished_at = timezone.now()
-            task_record.save()
-            self.flow.save()
+                # TODO: check target against step target
 
-            current_step = next(
-                (
-                    step
-                    for step in self.flow.workflow.steps
-                    if step.step_id == (target or current_step.target)
-                ),
-                None,
-            )
+                task_record.finished_at = timezone.now()
+                task_record.save()
+                self.flow.save()
 
-            task_info = task_output
+                current_step = next(
+                    (
+                        step
+                        for step in self.flow.workflow.steps
+                        if step.step_id == (target or current_step.target)
+                    ),
+                    None,
+                )
+
+                task_info = task_output
 
         self.flow.finished = timezone.now()
         self.flow.save()
@@ -72,26 +79,29 @@ class WorkflowExecutor:
         return task_record
 
     @staticmethod
-    def get_current_step(flow, task_uuid=None):
+    def get_current_step(flow, task_uuids=None):
         """Get the current step.
 
         If a task uuid is provided we retrieve the related task record/step
         otherwise use the workflow's designated first step.
 
         :param (Flow) flow: the workflow.
-        :param (str) task_uuid: UUID of the current task or None.
+        :param (list) task_uuids: UUID of the current task or None.
         :returns (Step): A workflow step.
         """
-        if task_uuid:
-            current_step = flow.workflow.get_step(
-                TaskRecord.objects.get(uuid=task_uuid).step_id
-            )
+        current_steps = []
+        if task_uuids:
+            for task_uuid in task_uuids:
+                current_steps.append(flow.workflow.get_step(
+                        TaskRecord.objects.get(uuid=task_uuid).step_id
+                    )
+                )
         else:
-            current_step = flow.workflow.first_step
+            current_steps.append(flow.workflow.first_step)
             flow.started = timezone.now()
             flow.save()
 
-        return current_step
+        return current_steps
 
     @staticmethod
     def check_authorised(user, step):
