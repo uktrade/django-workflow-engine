@@ -14,7 +14,6 @@ class Step:
     task_name: str
     target: Optional[str]
     start: Optional[bool] = None
-    condition: Optional[Any] = None
     task_info: Optional[dict] = None
     description: Optional[str] = None
     groups: list[str] = field(default_factory=list)

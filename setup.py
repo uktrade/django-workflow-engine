@@ -15,7 +15,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "django>=2.2.24",
+        "django>=3.2.8",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
