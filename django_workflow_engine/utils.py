@@ -1,5 +1,6 @@
 """django_workflow_engine utils."""
 import importlib
+from django.conf import settings
 
 from .exceptions import WorkflowImproperlyConfigured
 
@@ -50,11 +51,16 @@ def load_workflow(workflow_path):
         class e.g: 'workflows.onboard_contractor.OnboardContractor'
     :returns (class): The workflow class.
     """
-    try:
-        module_path, cls = workflow_path.rsplit(".", 1)
-        module = importlib.import_module(module_path)
-        return getattr(module, cls)
-    except (ModuleNotFoundError, ImportError, AttributeError) as e:
-        raise WorkflowImproperlyConfigured(
-            f"Failed to load workflow from '{workflow_path}': {e}"
-        )
+    return settings.DJANGO_WORKFLOWS[workflow_path]
+    #
+    # try:
+    #     if "." in workflow_path:
+    #         module_path, cls = workflow_path.rsplit(".", 1)
+    #         module = importlib.import_module(module_path)
+    #         return getattr(module, cls)
+    #     else:
+    #         return workflow_path
+    # except (ModuleNotFoundError, ImportError, AttributeError) as e:
+    #     raise WorkflowImproperlyConfigured(
+    #         f"Failed to load workflow from '{workflow_path}': {e}"
+    #     )

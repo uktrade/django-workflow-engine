@@ -33,8 +33,13 @@ class WorkflowExecutor:
 
         current_steps = self.get_current_step(self.flow, task_uuids)
 
-        for current_step in current_steps:
-            while current_step:
+        print("current_steps 1")
+        print(current_steps)
+
+        while len(current_steps) > 0:
+            print("current_steps 2")
+            print(current_steps)
+            for current_step in current_steps:
                 task_record, created = TaskRecord.objects.get_or_create(
                     flow=self.flow,
                     task_name=current_step.task_name,
@@ -56,20 +61,38 @@ class WorkflowExecutor:
 
                 target, task_output = task.execute(task_info)
 
+                print("target")
+                print(target)
+
+                # print("task_output")
+                # print(task_output)
+
                 # TODO: check target against step target
 
                 task_record.finished_at = timezone.now()
                 task_record.save()
                 self.flow.save()
 
-                current_step = next(
-                    (
-                        step
-                        for step in self.flow.workflow.steps
-                        if step.step_id == (target or current_step.target)
-                    ),
-                    None,
-                )
+                current_steps = []
+
+                for step in self.flow.workflow.steps:
+                    if current_step.target:
+                        if step.step_id in target or step.step_id in current_step.target:
+                            # print("Step appended...")
+                            # print(step.step_id)
+                            current_steps.append(step)
+
+                print("current_steps 3")
+                print(current_steps)
+
+                # current_steps = next(
+                #     (
+                #         step
+                #         for step in self.flow.workflow.steps
+                #         if step.step_id in target or step.step_id in current_step.target
+                #     ),
+                #     None,
+                # )
 
                 task_info = task_output
 

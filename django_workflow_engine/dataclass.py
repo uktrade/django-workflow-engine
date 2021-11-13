@@ -12,7 +12,7 @@ from .tasks import Task
 class Step:
     step_id: str
     task_name: str
-    target: Optional[str]
+    target: Optional[list[str]]
     start: Optional[bool] = None
     task_info: Optional[dict] = None
     description: Optional[str] = None
