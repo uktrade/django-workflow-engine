@@ -10,11 +10,10 @@ from django_workflow_engine.tests.utils import create_test_user
 
 
 class BasicTask(Task):
-    task_name = "test_task"
+    task_name = "basic_task"
     auto = True
 
     def execute(self, task_info):
-        print("Executed...")
         return None, {}
 
 
@@ -27,7 +26,7 @@ def test_workflow_creation(settings):
         steps=[
             Step(
                 step_id="test_task",
-                task_name="test_task",
+                task_name="basic_task",
                 start=True,
                 target=None,
             ),
@@ -49,53 +48,72 @@ def test_workflow_creation(settings):
     executor.run_flow(user=test_user)
 
 
-class Branch(Task):
-    task_name = "branch_test"
+class StartTask(Task):
+    task_name = "start"
     auto = True
 
     def execute(self, task_info):
-        # print("Branching...")
         return ["task_a", "task_b"], {}
 
 
-class BranchedA(Task):
-    task_name = "branched_a_test"
+class TaskA(Task):
+    task_name = "task_a"
     auto = True
 
     def execute(self, task_info):
-        # print("Branched A...")
-        return ["finish_up_a", ], {}
+        return ["finish_up_a"], {}
 
 
-class BranchedB(Task):
-    task_name = "branched_b_test"
+class TaskB(Task):
+    task_name = "task_b"
     auto = True
 
     def execute(self, task_info):
-        # print("Branched B...")
-        return ["finish_up_b", ], {}
+        return ["finish_up_b"], {}
 
 
-class FinishA(Task):
+class FinishTaskA(Task):
     task_name = "finish_up_a"
     auto = True
 
     def execute(self, task_info):
-        # print("Finish up a...")
         return None, {}
 
 
-class FinishB(Task):
+class FinishTaskB(Task):
     task_name = "finish_up_b"
     auto = True
 
     def execute(self, task_info):
-        # print("Finish up b...")
+        return None, {}
+
+
+class FinishMeetUpTaskA(Task):
+    task_name = "finish_meet_up_a"
+    auto = True
+
+    def execute(self, task_info):
+        return ["meet_up", ], {}
+
+
+class FinishMeetUpTaskB(Task):
+    task_name = "finish_meet_up_b"
+    auto = True
+
+    def execute(self, task_info):
+        return ["meet_up", ], {}
+
+
+class MeetUp(Task):
+    task_name = "meet_up"
+    auto = True
+
+    def execute(self, task_info):
         return None, {}
 
 
 @pytest.mark.django_db
-def test_multi_path_workflow(settings):
+def test_parallel_path_no_join_workflow(settings):
     test_user = create_test_user()
 
     test_workflow = Workflow(
@@ -103,18 +121,18 @@ def test_multi_path_workflow(settings):
         steps=[
             Step(
                 step_id="start",
-                task_name="branch_test",
+                task_name="start",
                 start=True,
                 target=["task_a", "task_b"],
             ),
             Step(
                 step_id="task_a",
-                task_name="branched_a_test",
+                task_name="task_a",
                 target=["finish_up_a"],
             ),
             Step(
                 step_id="task_b",
-                task_name="branched_b_test",
+                task_name="task_b",
                 target=["finish_up_b"],
             ),
             Step(
@@ -144,22 +162,24 @@ def test_multi_path_workflow(settings):
     executor = WorkflowExecutor(flow)
     executor.run_flow(user=test_user)
 
+    assert TaskRecord.objects.count() == 5
+
     assert TaskRecord.objects.filter(
         flow=flow,
         step_id="start",
-        task_name="branch_test",
+        task_name="start",
     ).first()
 
     assert TaskRecord.objects.filter(
         flow=flow,
         step_id="task_a",
-        task_name="branched_a_test",
+        task_name="task_a",
     ).first()
 
     assert TaskRecord.objects.filter(
         flow=flow,
         step_id="task_b",
-        task_name="branched_b_test",
+        task_name="task_b",
     ).first()
 
     assert TaskRecord.objects.filter(
@@ -174,7 +194,99 @@ def test_multi_path_workflow(settings):
         task_name="finish_up_b",
     ).first()
 
-    assert False
+
+@pytest.mark.django_db
+def test_parallel_path_join_up_workflow(settings):
+    test_user = create_test_user()
+
+    test_workflow = Workflow(
+        name="test_workflow_1",
+        steps=[
+            Step(
+                step_id="start",
+                task_name="start",
+                start=True,
+                target=["task_a", "task_b"],
+            ),
+            Step(
+                step_id="task_a",
+                task_name="task_a",
+                target=["finish_meet_up_a"],
+            ),
+            Step(
+                step_id="task_b",
+                task_name="task_b",
+                target=["finish_meet_up_b"],
+            ),
+            Step(
+                step_id="finish_meet_up_a",
+                task_name="finish_meet_up_a",
+                target=["meet_up", ],
+            ),
+            Step(
+                step_id="finish_meet_up_b",
+                task_name="finish_meet_up_b",
+                target=["meet_up", ],
+            ),
+            Step(
+                step_id="meet_up",
+                task_name="meet_up",
+                target=None,
+            ),
+        ]
+    )
+
+    settings.DJANGO_WORKFLOWS = {
+        "test_workflow_1": test_workflow,
+    }
+
+    flow = Flow.objects.create(
+        workflow_name="test_workflow_1",
+        flow_name="test_flow",
+        executed_by=test_user,
+    )
+    flow.save()
+
+    executor = WorkflowExecutor(flow)
+    executor.run_flow(user=test_user)
+
+    assert TaskRecord.objects.count() == 7
+
+    assert TaskRecord.objects.filter(
+        flow=flow,
+        step_id="start",
+        task_name="start",
+    ).first()
+
+    assert TaskRecord.objects.filter(
+        flow=flow,
+        step_id="task_a",
+        task_name="task_a",
+    ).first()
+
+    assert TaskRecord.objects.filter(
+        flow=flow,
+        step_id="task_b",
+        task_name="task_b",
+    ).first()
+
+    assert TaskRecord.objects.filter(
+        flow=flow,
+        step_id="finish_meet_up_a",
+        task_name="finish_meet_up_a",
+    ).first()
+
+    assert TaskRecord.objects.filter(
+        flow=flow,
+        step_id="finish_meet_up_b",
+        task_name="finish_meet_up_b",
+    ).first()
+
+    assert TaskRecord.objects.filter(
+        flow=flow,
+        step_id="meet_up",
+        task_name="meet_up",
+    ).count() == 2
 
 
 def test_only_group_member_can_execute():

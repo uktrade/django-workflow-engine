@@ -32,72 +32,66 @@ class WorkflowExecutor:
             raise WorkflowError("Flow already started")
 
         current_steps = self.get_current_step(self.flow, task_uuids)
-
-        print("current_steps 1")
-        print(current_steps)
-
-        while len(current_steps) > 0:
-            print("current_steps 2")
-            print(current_steps)
-            for current_step in current_steps:
-                task_record, created = TaskRecord.objects.get_or_create(
-                    flow=self.flow,
-                    task_name=current_step.task_name,
-                    step_id=current_step.step_id,
-                    executed_by=None,
-                    finished_at=None,
-                    defaults={"task_info": current_step.task_info or {}},
-                )
-
-                task = current_step.task(user, task_record, self.flow)
-
-                task.setup(task_info)
-
-                # the next task has a manual step
-                if not task.auto and created:
-                    return task_record
-
-                self.check_authorised(user, current_step)  # Raises if user not authorised for step
-
-                target, task_output = task.execute(task_info)
-
-                print("target")
-                print(target)
-
-                # print("task_output")
-                # print(task_output)
-
-                # TODO: check target against step target
-
-                task_record.finished_at = timezone.now()
-                task_record.save()
-                self.flow.save()
-
-                current_steps = []
-
-                for step in self.flow.workflow.steps:
-                    if current_step.target:
-                        if step.step_id in target or step.step_id in current_step.target:
-                            # print("Step appended...")
-                            # print(step.step_id)
-                            current_steps.append(step)
-
-                print("current_steps 3")
-                print(current_steps)
-
-                # current_steps = next(
-                #     (
-                #         step
-                #         for step in self.flow.workflow.steps
-                #         if step.step_id in target or step.step_id in current_step.target
-                #     ),
-                #     None,
-                # )
-
-                task_info = task_output
+        task_record = self.execute_steps(user, current_steps, task_info)
 
         self.flow.finished = timezone.now()
         self.flow.save()
+
+        return task_record
+
+    def execute_steps(self, user, current_steps, task_info):
+        for current_step in current_steps:
+            task_record, created = TaskRecord.objects.get_or_create(
+                flow=self.flow,
+                task_name=current_step.task_name,
+                step_id=current_step.step_id,
+                executed_by=None,
+                finished_at=None,
+                defaults={"task_info": current_step.task_info or {}},
+            )
+
+            task = current_step.task(user, task_record, self.flow)
+
+            task.setup(task_info)
+
+            # the next task has a manual step
+            if not task.auto and created:
+                return task_record
+
+            self.check_authorised(user, current_step)  # Raises if user not authorised for step
+
+            target, task_output = task.execute(task_info)
+
+            # TODO: check target against step target
+
+            task_record.finished_at = timezone.now()
+            task_record.save()
+            self.flow.save()
+
+            current_steps = []
+
+            print("target")
+            print(target)
+
+            for step in self.flow.workflow.steps:
+                if current_step.target:
+                    if step.step_id in target or step.step_id in current_step.target:
+                        current_steps.append(step)
+
+
+            # current_steps = next(
+            #     (
+            #         step
+            #         for step in self.flow.workflow.steps
+            #         if step.step_id in target or step.step_id in current_step.target
+            #     ),
+            #     None,
+            # )
+
+            task_info = task_output
+
+            if len(current_steps) > 0:
+                self.execute_steps(user, current_steps, task_info)
 
         return task_record
 
