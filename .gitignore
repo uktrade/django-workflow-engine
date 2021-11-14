@@ -133,3 +133,6 @@ dmypy.json
 
 # OS X
 .DS_Store
+
+# Test output
+test/
