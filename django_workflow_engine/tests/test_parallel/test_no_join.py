@@ -55,27 +55,27 @@ def test_parallel_path_no_join_workflow(settings):
                 step_id="start",
                 task_name="start",
                 start=True,
-                target=["task_a", "task_b"],
+                targets=["task_a", "task_b"],
             ),
             Step(
                 step_id="task_a",
                 task_name="task_a",
-                target=["finish_up_a"],
+                targets=["finish_up_a"],
             ),
             Step(
                 step_id="task_b",
                 task_name="task_b",
-                target=["finish_up_b"],
+                targets=["finish_up_b"],
             ),
             Step(
                 step_id="finish_up_a",
                 task_name="finish_up_a",
-                target=None,
+                targets=None,
             ),
             Step(
                 step_id="finish_up_b",
                 task_name="finish_up_b",
-                target=None,
+                targets=None,
             ),
         ]
     )

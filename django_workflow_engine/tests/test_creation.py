@@ -21,7 +21,7 @@ def test_workflow_creation(settings):
                 step_id="test_task",
                 task_name="basic_task",
                 start=True,
-                target=None,
+                targets=None,
             ),
         ]
     )

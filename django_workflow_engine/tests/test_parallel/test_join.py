@@ -47,22 +47,22 @@ def test_parallel_path_join_up_workflow(settings):
                 step_id="start",
                 task_name="start",
                 start=True,
-                target=["task_a", "task_b"],
+                targets=["task_a", "task_b"],
             ),
             Step(
                 step_id="task_a",
                 task_name="task_a",
-                target=["meet_up"],
+                targets=["meet_up"],
             ),
             Step(
                 step_id="task_b",
                 task_name="task_b",
-                target=["meet_up"],
+                targets=["meet_up"],
             ),
             Step(
                 step_id="meet_up",
                 task_name="meet_up",
-                target=None,
+                targets=None,
             ),
         ]
     )

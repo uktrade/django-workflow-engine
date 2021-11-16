@@ -96,8 +96,8 @@ class WorkflowExecutor:
 
             if targets:
                 for step in self.flow.workflow.steps:
-                    if current_step.target:
-                        if step.step_id in targets or step.step_id in current_step.target:
+                    if current_step.targets:
+                        if step.step_id in targets or step.step_id in current_step.targets:
                             current_steps.append(step)
 
             task_info = task_output

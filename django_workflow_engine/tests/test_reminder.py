@@ -52,17 +52,17 @@ def test_reminder_style_workflow(settings):
                 step_id="start_reminder",
                 task_name="start_reminder",
                 start=True,
-                target=["was_task_completed"],
+                targets=["was_task_completed"],
             ),
             Step(
                 step_id="was_user_created",
                 task_name="was_user_created",
-                target=["remind_creator", None],
+                targets=["remind_creator", None],
             ),
             Step(
                 step_id="remind_creator",
                 task_name="remind_creator",
-                target=["was_user_created", ],
+                targets=["was_user_created", ],
                 break_flow=True,
             ),
         ]
