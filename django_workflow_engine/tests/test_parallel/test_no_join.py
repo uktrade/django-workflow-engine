@@ -91,8 +91,8 @@ def test_parallel_path_no_join_workflow(settings):
     correct_task_order = [
         "start",
         "task_a",
-        "task_b",
         "finish_up_a",
+        "task_b",
         "finish_up_b",
     ]
 
