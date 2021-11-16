@@ -79,15 +79,24 @@ class TaskRecord(models.Model):
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="tasks")
     step_id = models.CharField(max_length=100)
     task_name = models.CharField(max_length=100)
-    target = models.CharField(
+    task_info = models.JSONField(default=dict)
+    broke_flow = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.step_id} {self.task_name}"
+
+
+class Target(models.Model):
+    target_string = models.CharField(
         max_length=100,
         blank=True,
         null=True,
     )
-    task_info = models.JSONField(default=dict)
-
-    def __str__(self):
-        return f"{self.step_id} {self.task_name}"
+    task_record = models.ForeignKey(
+        TaskRecord,
+        on_delete=models.CASCADE,
+        related_name="targets",
+    )
 
 
 class TaskLog(models.Model):

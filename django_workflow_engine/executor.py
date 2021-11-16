@@ -3,7 +3,7 @@ import logging
 from django.utils import timezone
 
 from .exceptions import WorkflowError, WorkflowNotAuthError
-from django_workflow_engine.models import TaskRecord
+from django_workflow_engine.models import TaskRecord, Target
 
 
 logger = logging.getLogger(__name__)
@@ -32,14 +32,30 @@ class WorkflowExecutor:
             raise WorkflowError("Flow already started")
 
         current_steps = self.get_current_step(self.flow, task_uuids)
-        task_record = self.execute_steps(user, current_steps, task_info)
+        task_record, break_flow = self.execute_steps(
+            user,
+            current_steps,
+            task_info,
+            False,
+            True,
+        )
 
-        self.flow.finished = timezone.now()
-        self.flow.save()
+        if not break_flow:
+            self.flow.finished = timezone.now()
+            self.flow.save()
 
         return task_record
 
-    def execute_steps(self, user, current_steps, task_info):
+    def execute_steps(
+        self,
+        user,
+        current_steps,
+        task_info,
+        break_flow,
+        first_run,
+    ):
+        task_record = None
+
         for current_step in current_steps:
             task_record, created = TaskRecord.objects.get_or_create(
                 flow=self.flow,
@@ -48,6 +64,7 @@ class WorkflowExecutor:
                 executed_by=None,
                 finished_at=None,
                 defaults={"task_info": current_step.task_info or {}},
+                broke_flow=current_step.break_flow,
             )
 
             task = current_step.task(user, task_record, self.flow)
@@ -60,7 +77,14 @@ class WorkflowExecutor:
 
             self.check_authorised(user, current_step)  # Raises if user not authorised for step
 
-            target, task_output = task.execute(task_info)
+            targets, task_output = task.execute(task_info)
+
+            if targets:
+                for target in targets:
+                    Target.objects.get_or_create(
+                        task_record=task_record,
+                        target_string=target
+                    )
 
             # TODO: check target against step target
 
@@ -70,30 +94,23 @@ class WorkflowExecutor:
 
             current_steps = []
 
-            print("target")
-            print(target)
-
-            for step in self.flow.workflow.steps:
-                if current_step.target:
-                    if step.step_id in target or step.step_id in current_step.target:
-                        current_steps.append(step)
-
-
-            # current_steps = next(
-            #     (
-            #         step
-            #         for step in self.flow.workflow.steps
-            #         if step.step_id in target or step.step_id in current_step.target
-            #     ),
-            #     None,
-            # )
+            if targets:
+                for step in self.flow.workflow.steps:
+                    if current_step.target:
+                        if step.step_id in targets or step.step_id in current_step.target:
+                            current_steps.append(step)
 
             task_info = task_output
 
-            if len(current_steps) > 0:
-                self.execute_steps(user, current_steps, task_info)
+            if current_step.break_flow and not first_run:
+                break_flow = True
+            else:
+                first_run = False
 
-        return task_record
+                if len(current_steps) > 0:
+                    task_record, break_flow = self.execute_steps(user, current_steps, task_info, break_flow, first_run)
+
+        return task_record, break_flow
 
     @staticmethod
     def get_current_step(flow, task_uuids=None):
@@ -109,8 +126,26 @@ class WorkflowExecutor:
         current_steps = []
         if task_uuids:
             for task_uuid in task_uuids:
+                # TODO - error handling
+                task = TaskRecord.objects.get(uuid=task_uuid)
+
+                if task.broke_flow:
+                    task = TaskRecord.objects.get(uuid=task_uuid)
+
+                    targets = Target.objects.filter(
+                        task_record=task,
+                    ).all()
+
+                    for target in targets:
+                        next_task = TaskRecord.objects.filter(
+                            step_id=target.target_string,
+                        ).first()
+
+                        if next_task:
+                            task = next_task
+
                 current_steps.append(flow.workflow.get_step(
-                        TaskRecord.objects.get(uuid=task_uuid).step_id
+                        task.step_id
                     )
                 )
         else:

@@ -17,6 +17,8 @@ class Step:
     task_info: Optional[dict] = None
     description: Optional[str] = None
     groups: list[str] = field(default_factory=list)
+    no_log: Optional[bool] = False
+    break_flow: Optional[bool] = False
 
     @property
     def task(self):
