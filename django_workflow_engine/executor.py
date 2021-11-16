@@ -40,10 +40,6 @@ class WorkflowExecutor:
             True,
         )
 
-        print(task_record)
-        print("break_flow")
-        print(break_flow)
-
         if not break_flow:
             self.flow.finished = timezone.now()
             self.flow.save()
@@ -97,9 +93,6 @@ class WorkflowExecutor:
             self.flow.save()
 
             current_steps = []
-
-            print("targets")
-            print(targets)
 
             if targets:
                 for step in self.flow.workflow.steps:
