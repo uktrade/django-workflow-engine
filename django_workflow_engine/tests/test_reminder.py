@@ -11,12 +11,12 @@ from django_workflow_engine.tests.utils import create_test_user
 logger = logging.getLogger('test')
 
 
-class StartTask(Task):
-    task_name = "start"
+class StartReminderTask(Task):
+    task_name = "start_reminder"
     auto = True
 
     def execute(self, task_info):
-        return ["was_user_created",], {}
+        return ["was_user_created", ], {}
 
 
 class WasUserCreatedTask(Task):
@@ -43,14 +43,14 @@ class RemindCreatorTask(Task):
         return ["was_user_created", ], {}
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_reminder_style_workflow(settings):
     test_workflow = Workflow(
         name="test_workflow",
         steps=[
             Step(
-                step_id="start",
-                task_name="start",
+                step_id="start_reminder",
+                task_name="start_reminder",
                 start=True,
                 target=["was_task_completed"],
             ),
@@ -89,7 +89,7 @@ def test_reminder_style_workflow(settings):
     assert TaskRecord.objects.count() == 7
 
     correct_task_order = [
-        "start",
+        "start_reminder",
         "was_user_created",
         "remind_creator",
         "was_user_created",
