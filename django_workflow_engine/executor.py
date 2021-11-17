@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from .exceptions import WorkflowError, WorkflowNotAuthError
 from django_workflow_engine.models import TaskRecord, Target
+from django_workflow_engine import COMPLETE
 
 
 logger = logging.getLogger(__name__)
@@ -68,7 +69,6 @@ class WorkflowExecutor:
             )
 
             task = current_step.task(user, task_record, self.flow)
-
             task.setup(task_info)
 
             # the next task has a manual step
@@ -79,14 +79,10 @@ class WorkflowExecutor:
 
             targets, task_output = task.execute(task_info)
 
-            if targets:
-                for target in targets:
-                    Target.objects.get_or_create(
-                        task_record=task_record,
-                        target_string=target
-                    )
-
-            # TODO: check target against step target
+            # Default tasks will have None target
+            # So we want step targets to be used
+            if not targets:
+                targets = current_step.targets
 
             task_record.finished_at = timezone.now()
             task_record.save()
@@ -94,7 +90,13 @@ class WorkflowExecutor:
 
             current_steps = []
 
-            if targets:
+            if targets and targets != COMPLETE:
+                for target in targets:
+                    Target.objects.get_or_create(
+                        task_record=task_record,
+                        target_string=target
+                    )
+
                 for step in self.flow.workflow.steps:
                     if current_step.targets:
                         if step.step_id in targets or step.step_id in current_step.targets:

@@ -4,7 +4,7 @@ import pytest
 from django.contrib.auth.models import User
 from django_workflow_engine.models import TaskRecord
 
-from django_workflow_engine import Workflow, Step, Task
+from django_workflow_engine import Workflow, Step, Task, COMPLETE
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.utils import create_test_user
 
@@ -29,7 +29,7 @@ class WasUserCreatedTask(Task):
         ).first()
 
         if user:
-            return None, {}
+            return COMPLETE, {}
         else:
             return ["remind_creator", ], {}
 
@@ -57,7 +57,7 @@ def test_reminder_style_workflow(settings):
             Step(
                 step_id="was_user_created",
                 task_name="was_user_created",
-                targets=["remind_creator", None],
+                targets=["remind_creator", COMPLETE],
             ),
             Step(
                 step_id="remind_creator",

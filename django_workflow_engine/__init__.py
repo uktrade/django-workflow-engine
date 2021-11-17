@@ -30,3 +30,5 @@ from .exceptions import WorkflowNotAuthError
 from .tasks import SendEmail
 from .tasks import EmailFormTask
 from .tasks import Task, TaskError
+
+COMPLETE = "complete"

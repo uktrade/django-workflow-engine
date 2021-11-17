@@ -1,37 +1,13 @@
 import pytest
 
-from django_workflow_engine import Workflow, Step, Task
+from django_workflow_engine import Workflow, Step, Task, COMPLETE
 from django_workflow_engine.models import TaskRecord
 
 from django_workflow_engine.tests.utils import set_up_flow
 
 
-class StartTask(Task):
-    task_name = "start"
-    auto = True
-
-    def execute(self, task_info):
-        return ["task_a", "task_b"], {}
-
-
-class TaskA(Task):
-    task_name = "task_a"
-    auto = True
-
-    def execute(self, task_info):
-        return ["meet_up", ], {}
-
-
-class TaskB(Task):
-    task_name = "task_b"
-    auto = True
-
-    def execute(self, task_info):
-        return ["meet_up", ], {}
-
-
-class MeetUp(Task):
-    task_name = "meet_up"
+class BasicTask(Task):
+    task_name = "basic_task"
     auto = True
 
     def execute(self, task_info):
@@ -45,24 +21,24 @@ def test_parallel_path_join_up_workflow(settings):
         steps=[
             Step(
                 step_id="start",
-                task_name="start",
+                task_name="basic_task",
                 start=True,
                 targets=["task_a", "task_b"],
             ),
             Step(
                 step_id="task_a",
-                task_name="task_a",
+                task_name="basic_task",
                 targets=["meet_up"],
             ),
             Step(
                 step_id="task_b",
-                task_name="task_b",
+                task_name="basic_task",
                 targets=["meet_up"],
             ),
             Step(
                 step_id="meet_up",
-                task_name="meet_up",
-                targets=None,
+                task_name="basic_task",
+                targets=COMPLETE,
             ),
         ]
     )

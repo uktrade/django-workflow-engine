@@ -1,6 +1,6 @@
 import pytest
 
-from django_workflow_engine import Workflow, Step, Task
+from django_workflow_engine import Workflow, Step, Task, COMPLETE
 from django_workflow_engine.tests.utils import set_up_flow
 
 
@@ -21,7 +21,7 @@ def test_workflow_creation(settings):
                 step_id="test_task",
                 task_name="basic_task",
                 start=True,
-                targets=None,
+                targets=COMPLETE,
             ),
         ]
     )

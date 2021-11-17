@@ -1,9 +1,9 @@
 import pytest
 
-from django_workflow_engine import Workflow, Step, Task, COMPLETE
-from django_workflow_engine.models import TaskRecord
-
+from django_workflow_engine import Workflow, Step, Task
 from django_workflow_engine.tests.utils import set_up_flow
+from django_workflow_engine.models import TaskRecord
+from django_workflow_engine import COMPLETE
 
 
 class BasicTask(Task):
@@ -14,35 +14,27 @@ class BasicTask(Task):
         return None, {}
 
 
-@pytest.mark.django_db()
-def test_parallel_path_no_join_workflow(settings):
+@pytest.mark.django_db
+def test_workflow_creation(settings):
     test_workflow = Workflow(
         name="test_workflow",
         steps=[
             Step(
-                step_id="start",
+                step_id="first",
                 task_name="basic_task",
                 start=True,
-                targets=["task_a", "task_b"],
+                targets=["second", ],
             ),
             Step(
-                step_id="task_a",
+                step_id="second",
                 task_name="basic_task",
-                targets=["finish_up_a"],
+                start=True,
+                targets=["last", ],
             ),
             Step(
-                step_id="task_b",
+                step_id="last",
                 task_name="basic_task",
-                targets=["finish_up_b"],
-            ),
-            Step(
-                step_id="finish_up_a",
-                task_name="basic_task",
-                targets=COMPLETE,
-            ),
-            Step(
-                step_id="finish_up_b",
-                task_name="basic_task",
+                start=True,
                 targets=COMPLETE,
             ),
         ]
@@ -54,14 +46,12 @@ def test_parallel_path_no_join_workflow(settings):
     )
     executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 5
+    assert TaskRecord.objects.count() == 3
 
     correct_task_order = [
-        "start",
-        "task_a",
-        "finish_up_a",
-        "task_b",
-        "finish_up_b",
+        "first",
+        "second",
+        "last",
     ]
 
     for i, task_record in enumerate(TaskRecord.objects.all()):
