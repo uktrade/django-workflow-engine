@@ -16,14 +16,13 @@ def build_workflow_choices(workflows):
     :returns (list[Tuple]): List of tuples (workflow class name, display name)
     """
     choices = []
-    for workflow_path in workflows:
+    for display_name, workflow_path in workflows.items():
         workflow_class = load_workflow(workflow_path)
-        display_name = workflow_class.name.title().replace("_", " ")
         choices.append((workflow_class.name, display_name))
     return choices
 
 
-def lookup_workflow(workflows, name):
+def lookup_workflow(workflow_name):
     """Look up workflow class.
 
     Given the configured workflows and a workflow name, returns the associated
@@ -34,11 +33,12 @@ def lookup_workflow(workflows, name):
     :returns (class): The requested workflow class.
     :raises (WorkflowImproperlyConfigured): If workflow not found.
     """
-    for workflow_path in workflows:
-        workflow_class = load_workflow(workflow_path)
-        if workflow_class.name == name:
+
+    for display_name, workflow_path in settings.DJANGO_WORKFLOWS.items():
+        if display_name == workflow_name:
+            workflow_class = load_workflow(workflow_path)
             return workflow_class
-    raise WorkflowImproperlyConfigured(f"Cannot find workflow: {name}")
+    raise WorkflowImproperlyConfigured(f"Cannot find workflow: {display_name}")
 
 
 def load_workflow(workflow_path):

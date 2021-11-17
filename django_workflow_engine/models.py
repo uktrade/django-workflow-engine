@@ -33,7 +33,7 @@ class Flow(models.Model):
 
     @property
     def workflow(self):
-        return lookup_workflow(settings.DJANGO_WORKFLOWS, self.workflow_name)
+        return lookup_workflow(self.workflow_name)
 
     @property
     def current_task_record(self):
