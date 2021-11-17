@@ -17,7 +17,7 @@ def build_workflow_choices(workflows):
     """
     choices = []
     for display_name, workflow_path in workflows.items():
-        workflow_class = load_workflow(workflow_path)
+        workflow_class = load_workflow(display_name)
         choices.append((workflow_class.name, display_name))
     return choices
 
@@ -36,7 +36,7 @@ def lookup_workflow(workflow_name):
 
     for display_name, workflow_path in settings.DJANGO_WORKFLOWS.items():
         if display_name == workflow_name:
-            workflow_class = load_workflow(workflow_path)
+            workflow_class = load_workflow(display_name)
             return workflow_class
     raise WorkflowImproperlyConfigured(f"Cannot find workflow: {display_name}")
 
