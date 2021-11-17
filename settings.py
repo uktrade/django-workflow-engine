@@ -16,7 +16,7 @@ class DummyWorkflow:
 
 
 DJANGO_WORKFLOWS = {
-    "dummy": DummyWorkflow,
+    "dummy": "settings.DummyWorkflow",
 }
 
 

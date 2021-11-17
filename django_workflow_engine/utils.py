@@ -1,4 +1,5 @@
 """django_workflow_engine utils."""
+import sys
 import importlib
 from django.conf import settings
 
@@ -41,7 +42,7 @@ def lookup_workflow(workflow_name):
     raise WorkflowImproperlyConfigured(f"Cannot find workflow: {display_name}")
 
 
-def load_workflow(workflow_path):
+def load_workflow(workflow_key):
     """Load a workflow class.
 
     Given a workflow path, extrapolates the containing package/modules, imports
@@ -51,16 +52,19 @@ def load_workflow(workflow_path):
         class e.g: 'workflows.onboard_contractor.OnboardContractor'
     :returns (class): The workflow class.
     """
-    return settings.DJANGO_WORKFLOWS[workflow_path]
-    #
-    # try:
-    #     if "." in workflow_path:
-    #         module_path, cls = workflow_path.rsplit(".", 1)
-    #         module = importlib.import_module(module_path)
-    #         return getattr(module, cls)
-    #     else:
-    #         return workflow_path
-    # except (ModuleNotFoundError, ImportError, AttributeError) as e:
-    #     raise WorkflowImproperlyConfigured(
-    #         f"Failed to load workflow from '{workflow_path}': {e}"
-    #     )
+    class_or_str = settings.DJANGO_WORKFLOWS[workflow_key]
+
+    if type(class_or_str) is not str:
+        return class_or_str
+
+    try:
+        if "." in class_or_str:
+            module_path, cls = class_or_str.rsplit(".", 1)
+            module = importlib.import_module(module_path)
+            return getattr(module, cls)
+        else:
+            return getattr(sys.modules[__name__], class_or_str)
+    except (ModuleNotFoundError, ImportError, AttributeError) as e:
+        raise WorkflowImproperlyConfigured(
+            f"Failed to load workflow from '{class_or_str}': {e}"
+        )
