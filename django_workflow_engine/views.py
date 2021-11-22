@@ -184,7 +184,7 @@ def workflow_to_cytoscape_elements(flow):
 
     edges = []
     for step in flow.workflow.steps:
-        targets = step.target if isinstance(step.target, list) else [step.target]
+        targets = step.targets
         for target in targets:
             if not target:
                 continue
@@ -207,10 +207,7 @@ def step_to_node(flow, step):
         flow.tasks.order_by("started_at").filter(step_id=step.step_id).last()
     )
 
-    targets = []
-
-    if step.target:
-        targets = step.target if isinstance(step.target, list) else [step.target]
+    targets = step.targets
 
     end = not bool(targets)
     done = latest_step_task and bool(latest_step_task.finished_at)
