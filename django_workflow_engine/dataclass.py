@@ -3,7 +3,7 @@
 Dataclasses that are used to define a custom workflow and its steps.
 """
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Any
 
 from .tasks import Task
 
@@ -12,11 +12,13 @@ from .tasks import Task
 class Step:
     step_id: str
     task_name: str
-    target: Optional[str]
+    targets: Optional[list[str]]
     start: Optional[bool] = None
     task_info: Optional[dict] = None
     description: Optional[str] = None
     groups: list[str] = field(default_factory=list)
+    no_log: Optional[bool] = False
+    break_flow: Optional[bool] = False
 
     @property
     def task(self):

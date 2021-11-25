@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="django-workflow-engine",
-    version="0.0.17",
+    version="0.0.18",
     packages=find_packages(),
     include_package_data=True,
     author="DIT Live Service Team",
@@ -15,7 +15,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "django>=2.2.24",
+        "django>=3.2.8",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

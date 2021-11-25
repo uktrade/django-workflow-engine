@@ -1,14 +1,20 @@
+import logging
+
 from django.utils import timezone
 
 from .exceptions import WorkflowError, WorkflowNotAuthError
-from django_workflow_engine.models import TaskRecord
+from django_workflow_engine.models import TaskRecord, Target
+from django_workflow_engine import COMPLETE
+
+
+logger = logging.getLogger(__name__)
 
 
 class WorkflowExecutor:
     def __init__(self, flow):
         self.flow = flow
 
-    def run_flow(self, user, task_info=None, task_uuid=None):
+    def run_flow(self, user, task_info=None, task_uuids=None):
         """Run the workflow.
 
         We identify the current step and execute workflow steps until a manual
@@ -23,11 +29,35 @@ class WorkflowExecutor:
             task_info = {}
 
         # TODO: might be a race condition
-        if self.flow.started and not task_uuid:
+        if self.flow.started and not task_uuids:
             raise WorkflowError("Flow already started")
 
-        current_step = self.get_current_step(self.flow, task_uuid)
-        while current_step:
+        current_steps = self.get_current_step(self.flow, task_uuids)
+        task_record, break_flow = self.execute_steps(
+            user,
+            current_steps,
+            task_info,
+            False,
+            True,
+        )
+
+        if not break_flow:
+            self.flow.finished = timezone.now()
+            self.flow.save()
+
+        return task_record
+
+    def execute_steps(
+        self,
+        user,
+        current_steps,
+        task_info,
+        break_flow,
+        first_run,
+    ):
+        task_record = None
+
+        for current_step in current_steps:
             task_record, created = TaskRecord.objects.get_or_create(
                 flow=self.flow,
                 task_name=current_step.task_name,
@@ -35,10 +65,10 @@ class WorkflowExecutor:
                 executed_by=None,
                 finished_at=None,
                 defaults={"task_info": current_step.task_info or {}},
+                broke_flow=current_step.break_flow,
             )
 
             task = current_step.task(user, task_record, self.flow)
-
             task.setup(task_info)
 
             # the next task has a manual step
@@ -46,50 +76,86 @@ class WorkflowExecutor:
                 return task_record
 
             self.check_authorised(user, current_step)  # Raises if user not authorised for step
-            target, task_output = task.execute(task_info)
 
-            # TODO: check target against step target
+            targets, task_output = task.execute(task_info)
+
+            # Default tasks will have None target
+            # So we want step targets to be used
+            if not targets:
+                targets = current_step.targets
 
             task_record.finished_at = timezone.now()
             task_record.save()
             self.flow.save()
 
-            current_step = next(
-                (
-                    step
-                    for step in self.flow.workflow.steps
-                    if step.step_id == (target or current_step.target)
-                ),
-                None,
-            )
+            current_steps = []
+
+            if targets and targets != COMPLETE:
+                for target in targets:
+                    Target.objects.get_or_create(
+                        task_record=task_record,
+                        target_string=target
+                    )
+
+                for step in self.flow.workflow.steps:
+                    if current_step.targets:
+                        if step.step_id in targets or step.step_id in current_step.targets:
+                            current_steps.append(step)
 
             task_info = task_output
 
-        self.flow.finished = timezone.now()
-        self.flow.save()
+            if current_step.break_flow and not first_run:
+                break_flow = True
+            else:
+                first_run = False
 
-        return task_record
+                if len(current_steps) > 0:
+                    task_record, break_flow = self.execute_steps(user, current_steps, task_info, break_flow, first_run)
+
+        return task_record, break_flow
 
     @staticmethod
-    def get_current_step(flow, task_uuid=None):
+    def get_current_step(flow, task_uuids=None):
         """Get the current step.
 
         If a task uuid is provided we retrieve the related task record/step
         otherwise use the workflow's designated first step.
 
         :param (Flow) flow: the workflow.
-        :param (str) task_uuid: UUID of the current task or None.
+        :param (list) task_uuids: UUID of the current task or None.
         :returns (Step): A workflow step.
         """
-        if task_uuid:
-            current_step = flow.workflow.get_step(
-                TaskRecord.objects.get(uuid=task_uuid).step_id
-            )
+        current_steps = []
+        if task_uuids:
+            for task_uuid in task_uuids:
+                # TODO - error handling
+                task = TaskRecord.objects.get(uuid=task_uuid)
+
+                if task.broke_flow:
+                    task = TaskRecord.objects.get(uuid=task_uuid)
+
+                    targets = Target.objects.filter(
+                        task_record=task,
+                    ).all()
+
+                    for target in targets:
+                        next_task = TaskRecord.objects.filter(
+                            step_id=target.target_string,
+                        ).first()
+
+                        if next_task:
+                            task = next_task
+
+                current_steps.append(flow.workflow.get_step(
+                        task.step_id
+                    )
+                )
         else:
-            current_step = flow.workflow.first_step
+            current_steps.append(flow.workflow.first_step)
             flow.started = timezone.now()
             flow.save()
-        return current_step
+
+        return current_steps
 
     @staticmethod
     def check_authorised(user, step):
@@ -105,9 +171,7 @@ class WorkflowExecutor:
         if not step.groups:
             return
 
-        user_groups = set(g.name for g in user.groups.all())
-        required_groups = set(step.groups)
-        if user_groups.intersection(required_groups):
+        if user.groups.filter(name__in=step.groups).exists():
             return
         msg = (
             f"User '{user}' is not authorised to execute the "

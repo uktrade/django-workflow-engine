@@ -68,11 +68,19 @@ class FlowDeleteView(DeleteView):
 
 
 class FlowContinueView(View):
+    cannot_view_step_url = None
+
     def __init__(self):
         super().__init__()
         self.flow = None
         self.step = None
         self.task = None
+
+    def get_cannot_view_step_url(self):
+        return reverse_lazy(
+            "flow",
+            args=[self.flow.pk],
+        )
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -82,6 +90,19 @@ class FlowContinueView(View):
             self.step = self.flow.workflow.get_step(
                 self.flow.current_task_record.step_id
             )
+
+            # Check user can view step
+            self.cannot_view_step_url = self.get_cannot_view_step_url()
+
+            # Check user has permission to perform this task
+            try:
+                WorkflowExecutor.check_authorised(
+                    request.user,
+                    self.step,
+                )
+            except WorkflowNotAuthError:
+                return redirect(self.cannot_view_step_url)
+
             self.task = self.step.task(
                 request.user, self.flow.current_task_record, self.flow
             )
@@ -119,7 +140,7 @@ class FlowContinueView(View):
         executor = WorkflowExecutor(self.flow)
         try:
             executor.run_flow(
-                user=self.request.user, task_info=self.request.POST, task_uuid=task_uuid
+                user=self.request.user, task_info=self.request.POST, task_uuids=[task_uuid,]
             )
         except WorkflowNotAuthError as e:
             logger.warning(f"{e}")
@@ -159,7 +180,7 @@ def workflow_to_cytoscape_elements(flow):
 
     edges = []
     for step in flow.workflow.steps:
-        targets = step.target if isinstance(step.target, list) else [step.target]
+        targets = step.targets
         for target in targets:
             if not target:
                 continue
@@ -182,10 +203,7 @@ def step_to_node(flow, step):
         flow.tasks.order_by("started_at").filter(step_id=step.step_id).last()
     )
 
-    targets = []
-
-    if step.target:
-        targets = step.target if isinstance(step.target, list) else [step.target]
+    targets = step.targets
 
     end = not bool(targets)
     done = latest_step_task and bool(latest_step_task.finished_at)

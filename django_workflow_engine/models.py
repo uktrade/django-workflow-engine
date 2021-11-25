@@ -13,7 +13,6 @@ if not settings.DJANGO_WORKFLOWS:
 
 
 class Flow(models.Model):
-
     workflow_name = models.CharField("Select workflow", max_length=255)
     flow_name = models.CharField(
         "Select activity",
@@ -34,7 +33,7 @@ class Flow(models.Model):
 
     @property
     def workflow(self):
-        return lookup_workflow(settings.DJANGO_WORKFLOWS, self.workflow_name)
+        return lookup_workflow(self.workflow_name)
 
     @property
     def current_task_record(self):
@@ -80,15 +79,24 @@ class TaskRecord(models.Model):
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="tasks")
     step_id = models.CharField(max_length=100)
     task_name = models.CharField(max_length=100)
-    target = models.CharField(
+    task_info = models.JSONField(default=dict)
+    broke_flow = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.step_id} {self.task_name}"
+
+
+class Target(models.Model):
+    target_string = models.CharField(
         max_length=100,
         blank=True,
         null=True,
     )
-    task_info = models.JSONField(default=dict)
-
-    def __str__(self):
-        return f"{self.step_id} {self.task_name}"
+    task_record = models.ForeignKey(
+        TaskRecord,
+        on_delete=models.CASCADE,
+        related_name="targets",
+    )
 
 
 class TaskLog(models.Model):
