@@ -34,8 +34,5 @@ def test_workflow_creation(settings):
 
 
 def test_only_group_member_can_execute():
+    # TODO
     pass
-    # try:
-    #     executor.run_flow(user=test_user)
-    # except WorkflowNotAuthError as e:
-    #     raise PermissionDenied(f"{e}")

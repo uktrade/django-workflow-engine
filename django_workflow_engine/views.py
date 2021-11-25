@@ -77,7 +77,6 @@ class FlowContinueView(View):
         self.task = None
 
     def get_cannot_view_step_url(self):
-        print("base class call")
         return reverse_lazy(
             "flow",
             args=[self.flow.pk],
@@ -94,9 +93,6 @@ class FlowContinueView(View):
 
             # Check user can view step
             self.cannot_view_step_url = self.get_cannot_view_step_url()
-
-            print("self.cannot_view_step_url")
-            print(self.cannot_view_step_url)
 
             # Check user has permission to perform this task
             try:

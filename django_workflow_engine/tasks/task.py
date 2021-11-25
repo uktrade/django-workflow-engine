@@ -38,9 +38,6 @@ class Task(ABC):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        print("__init_subclass__")
-        print("cls.task_name")
-        print(cls.task_name)
 
         if cls.abstract and cls.task_name:
             raise TaskError("Abstract tasks should not have a task_name")
