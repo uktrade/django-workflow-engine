@@ -38,13 +38,7 @@ class RemindCreatorTask(Task):
 
     def execute(self, task_info):
         logger.info("Please create user 'Sam'")
-        return (
-            [
-                "was_user_created",
-            ],
-            {},
-            True,
-        )
+        return ["was_user_created"], {}, True
 
 
 class NotifyCreatorTask(Task):
@@ -53,8 +47,7 @@ class NotifyCreatorTask(Task):
 
     def execute(self, task_info):
         logger.info("A User was created")
-        return COMPLETE, {}
-        return ["was_user_created"], {}, True
+        return COMPLETE, {}, True
 
 
 @pytest.mark.django_db(transaction=True)
