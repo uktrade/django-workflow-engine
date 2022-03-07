@@ -92,21 +92,16 @@ class WorkflowExecutor:
             task_record.save()
             self.flow.save()
 
-            current_steps = []
+            current_sub_steps = []
 
             if targets and targets != COMPLETE:
                 for target in targets:
                     Target.objects.get_or_create(
                         task_record=task_record, target_string=target
                     )
-
                 for step in self.flow.workflow.steps:
-                    if current_step.targets:
-                        if (
-                            step.step_id in targets
-                            or step.step_id in current_step.targets
-                        ):
-                            current_steps.append(step)
+                    if step.step_id in targets:
+                        current_sub_steps.append(step)
 
             task_info = task_output
 
@@ -116,9 +111,9 @@ class WorkflowExecutor:
             else:
                 first_run = False
 
-                if len(current_steps) > 0:
+                if len(current_sub_steps) > 0:
                     task_record, break_flow = self.execute_steps(
-                        user, current_steps, task_info, break_flow, first_run
+                        user, current_sub_steps, task_info, break_flow, first_run
                     )
 
         return task_record, break_flow

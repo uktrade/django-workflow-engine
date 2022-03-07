@@ -26,10 +26,10 @@ class WasUserCreatedTask(Task):
             first_name="Sam",
         ).first()
 
-        if user:
-            return COMPLETE, {}, True
-        else:
+        if not user:
             return ["remind_creator"], {}, False
+
+        return ["notify_creator"], {}, True
 
 
 class RemindCreatorTask(Task):
@@ -71,6 +71,11 @@ def test_reminder_style_workflow(settings):
                 task_name="remind_creator",
                 targets=["was_user_created"],
                 break_flow=True,
+            ),
+            Step(
+                step_id="notify_creator",
+                task_name="notify_creator",
+                targets=[COMPLETE],
             ),
         ],
     )
