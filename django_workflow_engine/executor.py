@@ -63,7 +63,7 @@ class WorkflowExecutor:
                 task_name=current_step.task_name,
                 step_id=current_step.step_id,
                 executed_by=None,
-                finished_at=None,
+                executed_at=None,
                 defaults={"task_info": current_step.task_info or {}},
                 broke_flow=current_step.break_flow,
             )
@@ -84,7 +84,7 @@ class WorkflowExecutor:
             if not targets:
                 targets = current_step.targets
 
-            task_record.finished_at = timezone.now()
+            task_record.executed_at = timezone.now()
             task_record.save()
             self.flow.save()
 
