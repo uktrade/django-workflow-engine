@@ -14,9 +14,7 @@ class StartReminderTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return [
-            "was_user_created",
-        ], {}
+        return ["was_user_created"], {}, True
 
 
 class WasUserCreatedTask(Task):
@@ -29,11 +27,9 @@ class WasUserCreatedTask(Task):
         ).first()
 
         if user:
-            return ["notify_creator"], {}
+            return COMPLETE, {}, True
         else:
-            return [
-                "remind_creator",
-            ], {}
+            return ["remind_creator"], {}, False
 
 
 class RemindCreatorTask(Task):
@@ -42,9 +38,13 @@ class RemindCreatorTask(Task):
 
     def execute(self, task_info):
         logger.info("Please create user 'Sam'")
-        return [
-            "was_user_created",
-        ], {}
+        return (
+            [
+                "was_user_created",
+            ],
+            {},
+            True,
+        )
 
 
 class NotifyCreatorTask(Task):
@@ -54,6 +54,7 @@ class NotifyCreatorTask(Task):
     def execute(self, task_info):
         logger.info("A User was created")
         return COMPLETE, {}
+        return ["was_user_created"], {}, True
 
 
 @pytest.mark.django_db(transaction=True)
@@ -75,15 +76,8 @@ def test_reminder_style_workflow(settings):
             Step(
                 step_id="remind_creator",
                 task_name="remind_creator",
-                targets=[
-                    "was_user_created",
-                ],
+                targets=["was_user_created"],
                 break_flow=True,
-            ),
-            Step(
-                step_id="notify_creator",
-                task_name="notify_creator",
-                targets=[COMPLETE],
             ),
         ],
     )
@@ -101,9 +95,7 @@ def test_reminder_style_workflow(settings):
     task_record = TaskRecord.objects.last()
     executor.run_flow(
         user=test_user,
-        task_uuids=[
-            task_record.uuid,
-        ],
+        task_uuids=[task_record.uuid],
     )
 
     assert TaskRecord.objects.count() == 5
@@ -111,9 +103,7 @@ def test_reminder_style_workflow(settings):
     task_record = TaskRecord.objects.last()
     executor.run_flow(
         user=test_user,
-        task_uuids=[
-            task_record.uuid,
-        ],
+        task_uuids=[task_record.uuid],
     )
 
     assert TaskRecord.objects.count() == 7
@@ -137,9 +127,7 @@ def test_reminder_style_workflow(settings):
     task_record = TaskRecord.objects.last()
     executor.run_flow(
         user=test_user,
-        task_uuids=[
-            task_record.uuid,
-        ],
+        task_uuids=[task_record.uuid],
     )
 
     assert TaskRecord.objects.count() == 9

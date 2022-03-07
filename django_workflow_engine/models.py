@@ -80,6 +80,7 @@ class TaskRecord(models.Model):
     step_id = models.CharField(max_length=100)
     task_name = models.CharField(max_length=100)
     task_info = models.JSONField(default=dict)
+    done = models.BooleanField(default=False)
     broke_flow = models.BooleanField(default=False)
 
     def __str__(self):

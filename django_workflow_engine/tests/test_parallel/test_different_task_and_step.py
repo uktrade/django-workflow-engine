@@ -1,9 +1,7 @@
 import pytest
-
-from django_workflow_engine import Workflow, Step, Task
-from django_workflow_engine.tests.utils import set_up_flow
+from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.models import TaskRecord
-from django_workflow_engine import COMPLETE
+from django_workflow_engine.tests.utils import set_up_flow
 
 
 class BasicTask(Task):
@@ -11,7 +9,7 @@ class BasicTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return None, {}
+        return None, {}, True
 
 
 @pytest.mark.django_db
@@ -23,13 +21,13 @@ def test_workflow_creation(settings):
                 step_id="first",
                 task_name="basic_task",
                 start=True,
-                targets=["second", ],
+                targets=["second"],
             ),
             Step(
                 step_id="second",
                 task_name="basic_task",
                 start=True,
-                targets=["last", ],
+                targets=["last"],
             ),
             Step(
                 step_id="last",
@@ -37,7 +35,7 @@ def test_workflow_creation(settings):
                 start=True,
                 targets=COMPLETE,
             ),
-        ]
+        ],
     )
 
     flow, executor, test_user = set_up_flow(

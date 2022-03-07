@@ -2,10 +2,10 @@ import logging
 
 from django.utils import timezone
 
-from .exceptions import WorkflowError, WorkflowNotAuthError
-from django_workflow_engine.models import TaskRecord, Target
 from django_workflow_engine import COMPLETE
+from django_workflow_engine.models import Target, TaskRecord
 
+from .exceptions import WorkflowError, WorkflowNotAuthError
 
 logger = logging.getLogger(__name__)
 
@@ -75,14 +75,18 @@ class WorkflowExecutor:
             if not task.auto and created:
                 return task_record
 
-            self.check_authorised(user, current_step)  # Raises if user not authorised for step
+            # Raises if user not authorised for step
+            self.check_authorised(user, current_step)
 
-            targets, task_output = task.execute(task_info)
+            targets, task_output, task_done = task.execute(task_info)
 
             # Default tasks will have None target
             # So we want step targets to be used
             if not targets:
                 targets = current_step.targets
+
+            if task_done:
+                task_record.done = True
 
             task_record.executed_at = timezone.now()
             task_record.save()
@@ -93,24 +97,29 @@ class WorkflowExecutor:
             if targets and targets != COMPLETE:
                 for target in targets:
                     Target.objects.get_or_create(
-                        task_record=task_record,
-                        target_string=target
+                        task_record=task_record, target_string=target
                     )
 
                 for step in self.flow.workflow.steps:
                     if current_step.targets:
-                        if step.step_id in targets or step.step_id in current_step.targets:
+                        if (
+                            step.step_id in targets
+                            or step.step_id in current_step.targets
+                        ):
                             current_steps.append(step)
 
             task_info = task_output
 
             if current_step.break_flow and not first_run:
                 break_flow = True
+                break
             else:
                 first_run = False
 
                 if len(current_steps) > 0:
-                    task_record, break_flow = self.execute_steps(user, current_steps, task_info, break_flow, first_run)
+                    task_record, break_flow = self.execute_steps(
+                        user, current_steps, task_info, break_flow, first_run
+                    )
 
         return task_record, break_flow
 
@@ -146,10 +155,7 @@ class WorkflowExecutor:
                         if next_task:
                             task = next_task
 
-                current_steps.append(flow.workflow.get_step(
-                        task.step_id
-                    )
-                )
+                current_steps.append(flow.workflow.get_step(task.step_id))
         else:
             current_steps.append(flow.workflow.first_step)
             flow.started = timezone.now()
@@ -173,8 +179,5 @@ class WorkflowExecutor:
 
         if user.groups.filter(name__in=step.groups).exists():
             return
-        msg = (
-            f"User '{user}' is not authorised to execute the "
-            f"step: {step.task_name}"
-        )
+        msg = f"User '{user}' is not authorised to execute the step: {step.task_name}"
         raise WorkflowNotAuthError(msg)

@@ -26,4 +26,4 @@ class SendEmail(Task):
             fail_silently=False,
         )
 
-        return None, {"successfully_sent": successfully_sent}
+        return None, {"successfully_sent": successfully_sent}, True
