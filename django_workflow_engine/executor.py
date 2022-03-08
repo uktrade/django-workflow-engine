@@ -58,18 +58,20 @@ class WorkflowExecutor:
         task_record = None
 
         for current_step in current_steps:
+            current_task_info = task_info or current_step.task_info or {}
+
             task_record, created = TaskRecord.objects.get_or_create(
                 flow=self.flow,
                 task_name=current_step.task_name,
                 step_id=current_step.step_id,
                 executed_by=None,
                 executed_at=None,
-                defaults={"task_info": current_step.task_info or {}},
+                defaults={"task_info": current_task_info},
                 broke_flow=current_step.break_flow,
             )
 
             task = current_step.task(user, task_record, self.flow)
-            task.setup(task_info)
+            task.setup(current_task_info)
 
             # the next task has a manual step
             if not task.auto and created:
@@ -78,7 +80,7 @@ class WorkflowExecutor:
             # Raises if user not authorised for step
             self.check_authorised(user, current_step)
 
-            targets, task_output, task_done = task.execute(task_info)
+            targets, task_output, task_done = task.execute(current_task_info)
 
             # Default tasks will have None target
             # So we want step targets to be used
@@ -103,8 +105,6 @@ class WorkflowExecutor:
                     if step.step_id in targets:
                         current_sub_steps.append(step)
 
-            task_info = task_output
-
             if current_step.break_flow and not first_run:
                 break_flow = True
                 break
@@ -113,7 +113,7 @@ class WorkflowExecutor:
 
                 if len(current_sub_steps) > 0:
                     task_record, break_flow = self.execute_steps(
-                        user, current_sub_steps, task_info, break_flow, first_run
+                        user, current_sub_steps, task_output, break_flow, first_run
                     )
 
         return task_record, break_flow
