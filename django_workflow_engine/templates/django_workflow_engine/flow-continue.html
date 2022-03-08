@@ -1,7 +1,9 @@
 <div>
+    {% for next_step in authorised_next_steps %}
     <form novalidate method="POST">
         {% csrf_token %}
-        <input type="hidden" name="uuid" value="{{ flow.current_task_record.uuid }}">
+        <input type="hidden" name="step_id" value="{{ next_step.step_id }}">
         <button>Submit</button>
     </form>
+    {% endfor %}
 </div>

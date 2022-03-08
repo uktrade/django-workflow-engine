@@ -3,9 +3,9 @@
 Dataclasses that are used to define a custom workflow and its steps.
 """
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import Optional
 
-from .tasks import Task
+from django_workflow_engine.tasks import Task
 
 
 @dataclass
@@ -21,7 +21,10 @@ class Step:
     break_flow: Optional[bool] = False
 
     @property
-    def task(self):
+    def task(self) -> Task:
+        """
+        What is this method supposed to do?
+        """
         return Task.tasks[self.task_name]
 
 

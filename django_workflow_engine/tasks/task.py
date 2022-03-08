@@ -4,7 +4,10 @@ A task is an instance of a django_workflow_engine.dataclasses.Step
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Tuple, Union
+
+if TYPE_CHECKING:
+    from django_workflow_engine.models import Flow, TaskRecord
 
 
 class TaskError(Exception):
@@ -26,7 +29,6 @@ class Task(ABC):
         auto: Whether the task is automatic or manual. Defaults to False (manual).
         abstract: Whether the task is an abstract task. Defaults to False.
         task_name: The name which will be used to map to the task class in `tasks`.
-        template: Optional template override.
     """
 
     tasks: dict[str, "Task"] = {}
@@ -34,9 +36,8 @@ class Task(ABC):
     auto: bool = False
     abstract: bool = False
     task_name: Optional[str] = None
-    template: Optional[str] = None
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
 
         if cls.abstract and cls.task_name:
@@ -48,17 +49,20 @@ class Task(ABC):
         if not cls.abstract and cls.task_name:
             cls.tasks[cls.task_name] = cls
 
-    def __init__(self, user, task_record, flow):
+    def __init__(self, user, task_record: "TaskRecord", flow: "Flow") -> None:
         self.user = user
-        self.task_record = task_record
-        self.flow = flow
+        self.task_record: "TaskRecord" = task_record
+        self.flow: "Flow" = flow
 
-    def setup(self, task_info):
+    def setup(self, task_info: Dict) -> None:
         pass
 
     @abstractmethod
-    def execute(self, task_info):
+    def execute(
+        self,
+        task_info: Dict,
+    ) -> Tuple[Union[List[str], Literal["complete"]], bool]:
         raise NotImplementedError
 
-    def log(self, message):
+    def log(self, message: str) -> None:
         self.task_record.log.create(message=message)

@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional
 
 from django import forms
 from django.conf import settings
@@ -11,6 +12,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.list import ListView
 
+from django_workflow_engine.dataclass import Step
 from django_workflow_engine.exceptions import WorkflowNotAuthError
 from django_workflow_engine.executor import WorkflowExecutor
 from django_workflow_engine.models import Flow, TaskRecord
@@ -50,15 +52,18 @@ class FlowCreateView(CreateView):
         return reverse("flow", args=[self.object.pk])
 
     def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.executed_by = self.request.user
         response = super().form_valid(form)
+
+        self.object.executed_by = self.request.user
+        self.object.save()
+
         executor = WorkflowExecutor(self.object)
         try:
             executor.run_flow(user=self.request.user)
         except WorkflowNotAuthError as e:
             logger.warning(f"{e}")
             raise PermissionDenied(f"{e}")
+
         return response
 
 
@@ -67,14 +72,16 @@ class FlowDeleteView(DeleteView):
     success_url = reverse_lazy("flow-list")
 
 
-class FlowContinueView(View):
+from django.views.generic import TemplateView
+
+
+class FlowContinueView(TemplateView):
+    template_name = "django_workflow_engine/flow-continue.html"
     cannot_view_step_url = None
 
-    def __init__(self):
-        super().__init__()
-        self.flow = None
-        self.step = None
-        self.task = None
+    flow: Flow
+    authorised_next_steps: List[Step] = []
+    workflow_executor: WorkflowExecutor
 
     def get_cannot_view_step_url(self):
         return reverse_lazy(
@@ -84,85 +91,64 @@ class FlowContinueView(View):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self.flow = Flow.objects.get(pk=kwargs.get("pk"))
 
-        if self.flow.current_task_record:
-            self.step = self.flow.workflow.get_step(
-                self.flow.current_task_record.step_id
-            )
+        self.flow: Flow = Flow.objects.get(pk=kwargs.get("pk"))
+        self.workflow_executor = WorkflowExecutor(self.flow)
+        next_steps: List[Step] = self.workflow_executor.get_current_steps()
+        self.authorised_next_steps: List[Step] = []
 
-            # Check user can view step
-            self.cannot_view_step_url = self.get_cannot_view_step_url()
-
-            # Check user has permission to perform this task
+        # Build a list of the next steps that the user is authorised to action.
+        for next_step in next_steps:
             try:
-                WorkflowExecutor.check_authorised(
+                self.workflow_executor.check_authorised(
                     request.user,
                     self.step,
                 )
             except WorkflowNotAuthError:
-                return redirect(self.cannot_view_step_url)
+                # User not authorised, skip this step
+                continue
 
-            self.task = self.step.task(
-                request.user, self.flow.current_task_record, self.flow
-            )
-        elif not self.flow.is_complete:
-            logger.info(f"{self.flow.nice_name} is not complete")
-            nodes = [step_to_node(self.flow, step) for step in self.flow.workflow.steps]
-            for n in nodes:
-                if n["data"]["done"] is None:
-                    self.step = self.flow.workflow.get_step(n["data"]["id"])
-                    self.task = self.step.task(
-                        request.user, self.flow.current_task_record, self.flow
-                    )
-                    task_record, created = TaskRecord.objects.get_or_create(
-                        flow=self.flow,
-                        task_name=self.step.task_name,
-                        step_id=self.step.step_id,
-                        executed_by=None,
-                        executed_at=None,
-                        defaults={"task_info": self.step.task_info or {}},
-                    )
-                    break
+            self.authorised_next_steps.append(next_step)
 
-    def get(self, request, pk, **kwargs):
-        if not self.task:
-            return redirect(reverse("flow-list"))
+        if not self.authorised_next_steps:
+            return redirect(self.get_cannot_view_step_url())
 
-        context = self.get_context_data()
-
-        template = self.task.template or "django_workflow_engine/flow-continue.html"
-
-        return render(request, template, context=context)
+    def get_step(self, step_id: str) -> Optional[Step]:
+        for step in self.authorised_next_steps:
+            if step.id == step_id:
+                return step
+        return None
 
     def post(self, request, **kwargs):
-        task_uuid = self.request.POST["uuid"]
-        executor = WorkflowExecutor(self.flow)
+        step_id = request.POST.get("step_id", None)
+        if not step_id:
+            return redirect("flow-continue", pk=self.flow.pk)
+
+        step: Step = self.get_step(step_id=step_id)
+        if not step:
+            return redirect("flow-continue", pk=self.flow.pk)
+
         try:
-            executor.run_flow(
+            self.workflow_executor.execute_step(
                 user=self.request.user,
-                task_info=self.request.POST,
-                task_uuids=[task_uuid],
+                step=step,
+                break_flow=False,
+                first_run=False,
             )
         except WorkflowNotAuthError as e:
             logger.warning(f"{e}")
             raise PermissionDenied(f"{e}")
         except TaskError as error:
-            template = self.task.template or "django_workflow_engine/flow-continue.html"
-
             context = self.get_context_data() | error.context
-
-            return render(request, template, context=context)
+            return super().render_to_response(context=context)
         return redirect(reverse("flow", args=[self.flow.pk]))
 
     def get_context_data(self, **kwargs):
-        context = {
-            "flow": self.flow,
-            "step": self.step,
-            "task": self.task,
-        }
-        if not self.task.auto:
-            context |= self.task.context()
+        context = super().get_context_data(**kwargs)
+        context.update(
+            flow=self.flow,
+            authorised_next_steps=self.authorised_next_steps,
+        )
         return context
 
 
@@ -200,15 +186,15 @@ def workflow_to_cytoscape_elements(flow):
     return [*nodes, *edges]
 
 
-def step_to_node(flow, step):
-    latest_step_task = (
+def step_to_node(flow: Flow, step: Step):
+    latest_step_task: TaskRecord = (
         flow.tasks.order_by("started_at").filter(step_id=step.step_id).last()
     )
 
     targets = step.targets
 
     end = not bool(targets)
-    done = latest_step_task and latest_step_task.executed_at
+    done = latest_step_task and latest_step_task.done
     current = latest_step_task and not latest_step_task.executed_at
 
     label = step.description or format_step_id(step.step_id)

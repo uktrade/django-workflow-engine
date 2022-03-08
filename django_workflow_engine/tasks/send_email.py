@@ -18,7 +18,7 @@ class SendEmail(Task):
             | {"flow": self.flow, "task": self.task_record}
         )
 
-        successfully_sent = send_mail(
+        send_mail(
             subject=email_info["subject"],
             message=message.render(context),
             from_email=email_info["from_email"],
@@ -26,4 +26,4 @@ class SendEmail(Task):
             fail_silently=False,
         )
 
-        return None, {"successfully_sent": successfully_sent}, True
+        return None, True

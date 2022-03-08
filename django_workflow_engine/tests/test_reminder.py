@@ -2,6 +2,7 @@ import logging
 
 import pytest
 from django.contrib.auth.models import User
+
 from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.models import TaskRecord
 from django_workflow_engine.tests.utils import create_test_user, set_up_flow
@@ -14,7 +15,7 @@ class StartReminderTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return ["was_user_created"], {}, True
+        return ["was_user_created"], True
 
 
 class WasUserCreatedTask(Task):
@@ -27,9 +28,9 @@ class WasUserCreatedTask(Task):
         ).first()
 
         if not user:
-            return ["remind_creator"], {}, False
+            return ["remind_creator"], False
 
-        return ["notify_creator"], {}, True
+        return ["notify_creator"], True
 
 
 class RemindCreatorTask(Task):
@@ -38,7 +39,7 @@ class RemindCreatorTask(Task):
 
     def execute(self, task_info):
         logger.info("Please create user 'Sam'")
-        return ["was_user_created"], {}, True
+        return ["was_user_created"], True
 
 
 class NotifyCreatorTask(Task):
@@ -47,7 +48,7 @@ class NotifyCreatorTask(Task):
 
     def execute(self, task_info):
         logger.info("A User was created")
-        return COMPLETE, {}, True
+        return COMPLETE, True
 
 
 @pytest.mark.django_db(transaction=True)
@@ -59,7 +60,7 @@ def test_reminder_style_workflow(settings):
                 step_id="start_reminder",
                 task_name="start_reminder",
                 start=True,
-                targets=["was_task_completed"],
+                targets=["was_user_created"],
             ),
             Step(
                 step_id="was_user_created",
@@ -88,23 +89,18 @@ def test_reminder_style_workflow(settings):
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
-    assert TaskRecord.objects.count() == 3
+    assert TaskRecord.objects.count() == 4
+    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 
-    task_record = TaskRecord.objects.last()
-    executor.run_flow(
-        user=test_user,
-        task_uuids=[task_record.uuid],
-    )
+    executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 5
+    assert TaskRecord.objects.count() == 6
+    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 
-    task_record = TaskRecord.objects.last()
-    executor.run_flow(
-        user=test_user,
-        task_uuids=[task_record.uuid],
-    )
+    executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 7
+    assert TaskRecord.objects.count() == 8
+    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 
     correct_task_order = [
         "start_reminder",
@@ -114,6 +110,7 @@ def test_reminder_style_workflow(settings):
         "remind_creator",
         "was_user_created",
         "remind_creator",
+        "was_user_created",
     ]
 
     for i, task_record in enumerate(TaskRecord.objects.all()):
@@ -122,15 +119,10 @@ def test_reminder_style_workflow(settings):
     # Create user
     create_test_user(first_name="Sam", username="SamIAm")
 
-    task_record = TaskRecord.objects.last()
-    executor.run_flow(
-        user=test_user,
-        task_uuids=[task_record.uuid],
-    )
+    executor.run_flow(user=test_user)
 
     assert TaskRecord.objects.count() == 9
 
-    correct_task_order.append("was_user_created")
     correct_task_order.append("notify_creator")
 
     for i, task_record in enumerate(TaskRecord.objects.all()):

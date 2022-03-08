@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 
-from django_workflow_engine.models import Flow
 from django_workflow_engine.executor import WorkflowExecutor
+from django_workflow_engine.models import Flow
 
 
 def create_test_user(

@@ -1,4 +1,5 @@
 import pytest
+
 from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.tests.utils import set_up_flow
 
@@ -9,7 +10,7 @@ class TaskInfoTask(Task):
 
     def execute(self, task_info):
         print("Task name: ", task_info["task_name"])
-        return None, {}, True
+        return None, True
 
 
 @pytest.mark.django_db

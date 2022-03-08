@@ -1,14 +1,15 @@
 import pytest
+
 from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.tests.utils import set_up_flow
 
 
-class BasicTask(Task):
-    task_name = "basic_task"
+class WorkflowCreationTestTask(Task):
+    task_name = "workflow_createion_test_task"
     auto = True
 
     def execute(self, task_info):
-        return None, {}, True
+        return None, True
 
 
 @pytest.mark.django_db
@@ -18,7 +19,7 @@ def test_workflow_creation(settings):
         steps=[
             Step(
                 step_id="test_task",
-                task_name="basic_task",
+                task_name="workflow_createion_test_task",
                 start=True,
                 targets=COMPLETE,
             ),

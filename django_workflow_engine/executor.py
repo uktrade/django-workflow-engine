@@ -1,165 +1,205 @@
 import logging
+from typing import TYPE_CHECKING, List, Tuple
 
 from django.utils import timezone
 
 from django_workflow_engine import COMPLETE
+from django_workflow_engine.exceptions import (WorkflowError,
+                                               WorkflowNotAuthError)
 from django_workflow_engine.models import Target, TaskRecord
 
-from .exceptions import WorkflowError, WorkflowNotAuthError
+if TYPE_CHECKING:
+    from django_workflow_engine.dataclass import Step
+    from django_workflow_engine.models import Flow
+    from django_workflow_engine.tasks.task import Task
+
 
 logger = logging.getLogger(__name__)
 
 
 class WorkflowExecutor:
-    def __init__(self, flow):
-        self.flow = flow
+    def __init__(self, flow: "Flow"):
+        self.flow: "Flow" = flow
 
-    def run_flow(self, user, task_info=None, task_uuids=None):
-        """Run the workflow.
+    def run_flow(self, user):
+        """
+        Run the workflow.
 
         We identify the current step and execute workflow steps until a manual
         step is encountered (e.g. complete a form) or the workflow is exhausted.
 
         :param (User) user: User requesting to run a flow step.
-        :param (dict) task_info: Additional task info.
-        :param (str) task_uuid: Task record UUID.
-        :returns (TaskRecord): New or updated task record.
         """
-        if task_info is None:
-            task_info = {}
 
-        # TODO: might be a race condition
-        if self.flow.started and not task_uuids:
-            raise WorkflowError("Flow already started")
+        if self.flow.running:
+            raise WorkflowError("Flow already running")
 
-        current_steps = self.get_current_step(self.flow, task_uuids)
-        task_record, break_flow = self.execute_steps(
-            user,
-            current_steps,
-            task_info,
-            False,
-            True,
+        # Mark the flow as running (an attempt to prevent concurrent execution of the same Flow)
+        self.flow.running = True
+        self.flow.save(update_fields=["running"])
+
+        # Progress the workflow
+        break_flow = self.execute_steps(
+            user=user,
+            break_flow=False,
+            first_run=True,
         )
 
+        print("CAM WAS HERE", break_flow)
+
+        # If the flow hasn't been broken, then we are done.
         if not break_flow:
             self.flow.finished = timezone.now()
-            self.flow.save()
 
-        return task_record
+        # Mark the flow as not running, so that it can be picked up again.
+        self.flow.running = False
+        self.flow.save(update_fields=["running"])
 
     def execute_steps(
         self,
         user,
-        current_steps,
-        task_info,
-        break_flow,
-        first_run,
-    ):
-        task_record = None
-
-        for current_step in current_steps:
-            current_task_info = task_info or current_step.task_info or {}
-
-            task_record, created = TaskRecord.objects.get_or_create(
-                flow=self.flow,
-                task_name=current_step.task_name,
-                step_id=current_step.step_id,
-                executed_by=None,
-                executed_at=None,
-                defaults={"task_info": current_task_info},
-                broke_flow=current_step.break_flow,
-            )
-
-            task = current_step.task(user, task_record, self.flow)
-            task.setup(current_task_info)
-
-            # the next task has a manual step
-            if not task.auto and created:
-                return task_record
-
-            # Raises if user not authorised for step
-            self.check_authorised(user, current_step)
-
-            targets, task_output, task_done = task.execute(current_task_info)
-
-            # Default tasks will have None target
-            # So we want step targets to be used
-            if not targets:
-                targets = current_step.targets
-
-            if task_done:
-                task_record.done = True
-
-            task_record.executed_at = timezone.now()
-            task_record.save()
-            self.flow.save()
-
-            current_sub_steps = []
-
-            if targets and targets != COMPLETE:
-                for target in targets:
-                    Target.objects.get_or_create(
-                        task_record=task_record, target_string=target
-                    )
-                for step in self.flow.workflow.steps:
-                    if step.step_id in targets:
-                        current_sub_steps.append(step)
-
-            if current_step.break_flow and not first_run:
-                break_flow = True
-                break
-            else:
-                first_run = False
-
-                if len(current_sub_steps) > 0:
-                    task_record, break_flow = self.execute_steps(
-                        user, current_sub_steps, task_output, break_flow, first_run
-                    )
-
-        return task_record, break_flow
-
-    @staticmethod
-    def get_current_step(flow, task_uuids=None):
-        """Get the current step.
-
-        If a task uuid is provided we retrieve the related task record/step
-        otherwise use the workflow's designated first step.
-
-        :param (Flow) flow: the workflow.
-        :param (list) task_uuids: UUID of the current task or None.
-        :returns (Step): A workflow step.
+        break_flow: bool,
+        first_run: bool,
+    ) -> bool:
         """
-        current_steps = []
-        if task_uuids:
-            for task_uuid in task_uuids:
-                # TODO - error handling
-                task = TaskRecord.objects.get(uuid=task_uuid)
+        Execute any steps that have not been complete.
 
-                if task.broke_flow:
-                    task = TaskRecord.objects.get(uuid=task_uuid)
+        This function is recursive/self referencing, this means it can cause an
+        infinite loop if there is a loop in the workflow without "break_flow"
+        being used correctly.
+        """
 
-                    targets = Target.objects.filter(
-                        task_record=task,
-                    ).all()
+        # Get all of the steps that need to be executed.
+        current_steps = self.get_current_steps()
 
-                    for target in targets:
-                        next_task = TaskRecord.objects.filter(
-                            step_id=target.target_string,
-                        ).first()
+        print("CURRENT STEPS", [step.step_id for step in current_steps])
 
-                        if next_task:
-                            task = next_task
+        # If there is nothing to execute, then we are done.
+        if not current_steps:
+            return break_flow
 
-                current_steps.append(flow.workflow.get_step(task.step_id))
+        # Execute the steps.
+        for current_step in current_steps:
+            print("Current Step", current_step.step_id)
+            current_step_break_flow, first_run = self.execute_step(
+                user=user,
+                step=current_step,
+                break_flow=break_flow,
+                first_run=first_run,
+            )
+            print("Break flow?", current_step_break_flow)
+            # We want to toggle break_flow to True, but not back to False.
+            if current_step_break_flow:
+                break_flow = True
+
+        # If we have broken the flow, then we are done, any remaining tasks will
+        # be picked up next time.
+        if break_flow:
+            return break_flow
+
+        # Call this function again to execute the next steps.
+        break_flow = self.execute_steps(
+            user=user,
+            break_flow=break_flow,
+            first_run=first_run,
+        )
+
+        return break_flow
+
+    def execute_step(
+        self,
+        user,
+        step: "Step",
+        break_flow: bool,
+        first_run: bool,
+    ) -> Tuple[bool, bool]:
+        """
+        Execute the task for the given step.
+
+        Generate any of the resulting tasks.
+        """
+
+        task_record, _ = self.get_or_create_task_record(step=step)
+
+        # Get the task for the current step
+        task: "Task" = step.task(user, task_record, self.flow)
+        task.setup(task_record.task_info)
+
+        # Check if this task is automatic or manual
+        if not task.auto:
+            return break_flow, first_run
+
+        # Raises if user not authorised for step
+        self.check_authorised(user, step)
+
+        # Execute the task
+        targets, task_done = task.execute(task_record.task_info)
+
+        # Default tasks will have None target
+        # So we want step targets to be used
+        if not targets:
+            targets = step.targets
+
+        task_record.done = task_done
+        task_record.executed_by = user
+        task_record.executed_at = timezone.now()
+        task_record.save()
+
+        # Create objects for the next tasks, generated after the current.
+        if targets and targets != COMPLETE:
+            for target in targets:
+                Target.objects.get_or_create(
+                    task_record=task_record, target_string=target
+                )
+            for workflow_step in self.flow.workflow.steps:
+                if workflow_step.step_id in targets:
+                    print("Creating task for", workflow_step.step_id)
+                    self.get_or_create_task_record(step=workflow_step)
+
+        if step.break_flow and not first_run:
+            break_flow = True
         else:
-            current_steps.append(flow.workflow.first_step)
-            flow.started = timezone.now()
-            flow.save()
+            first_run = False
+
+        return break_flow, first_run
+
+    def get_or_create_task_record(self, step: "Step") -> Tuple[TaskRecord, bool]:
+        """
+        Get or create a TaskRecord for a given Step.
+        """
+
+        task_record, created = TaskRecord.objects.get_or_create(
+            flow=self.flow,
+            task_name=step.task_name,
+            step_id=step.step_id,
+            executed_by=None,
+            executed_at=None,
+            defaults={"task_info": step.task_info or {}},
+            broke_flow=step.break_flow,
+        )
+        return task_record, created
+
+    def get_current_steps(self) -> List["Step"]:
+        """
+        Get the current steps.
+        """
+
+        current_steps: List["Step"] = []
+
+        # Get all TaskRecords that haven't been executed yet.
+        for task in self.flow.tasks.filter(executed_at__isnull=True):
+            current_steps.append(self.flow.workflow.get_step(task.step_id))
+
+        if not current_steps and not self.flow.started:
+            # If there are no steps and the flow has never started, then start the flow from the first step.
+            current_steps.append(self.flow.workflow.first_step)
+            self.flow.started = timezone.now()
+            self.flow.save(update_fields=["started"])
 
         return current_steps
 
     @staticmethod
-    def check_authorised(user, step):
+    def check_authorised(user, step: "Step"):
         """Check if a user is authorised to execute a workflow step.
 
         If no groups are defined on the step, the check will pass and permission will be

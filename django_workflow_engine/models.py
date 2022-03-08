@@ -24,6 +24,7 @@ class Flow(models.Model):
         on_delete=models.CASCADE,
     )
     started = models.DateTimeField(null=True)
+    running = models.BooleanField(default=False)
     finished = models.DateTimeField(null=True, blank=True)
     flow_info = models.JSONField(default=dict)
 

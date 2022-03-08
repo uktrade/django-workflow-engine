@@ -1,15 +1,16 @@
 import pytest
+
 from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.models import TaskRecord
 from django_workflow_engine.tests.utils import set_up_flow
 
 
-class BasicTask(Task):
-    task_name = "basic_task"
+class DifferentTaskAndStepTask(Task):
+    task_name = "different_task_and_step_task"
     auto = True
 
     def execute(self, task_info):
-        return None, {}, True
+        return None, True
 
 
 @pytest.mark.django_db
@@ -19,20 +20,18 @@ def test_workflow_creation(settings):
         steps=[
             Step(
                 step_id="first",
-                task_name="basic_task",
+                task_name="different_task_and_step_task",
                 start=True,
                 targets=["second"],
             ),
             Step(
                 step_id="second",
-                task_name="basic_task",
-                start=True,
+                task_name="different_task_and_step_task",
                 targets=["last"],
             ),
             Step(
                 step_id="last",
-                task_name="basic_task",
-                start=True,
+                task_name="different_task_and_step_task",
                 targets=COMPLETE,
             ),
         ],

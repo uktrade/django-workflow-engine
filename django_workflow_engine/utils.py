@@ -1,6 +1,7 @@
 """django_workflow_engine utils."""
-import sys
 import importlib
+import sys
+
 from django.conf import settings
 
 from .exceptions import WorkflowImproperlyConfigured
