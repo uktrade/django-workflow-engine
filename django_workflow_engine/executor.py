@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING, List, Tuple
 from django.utils import timezone
 
 from django_workflow_engine import COMPLETE
-from django_workflow_engine.exceptions import (WorkflowError,
-                                               WorkflowNotAuthError)
+from django_workflow_engine.exceptions import WorkflowError, WorkflowNotAuthError
 from django_workflow_engine.models import Target, TaskRecord
 
 if TYPE_CHECKING:
@@ -45,8 +44,6 @@ class WorkflowExecutor:
             first_run=True,
         )
 
-        print("CAM WAS HERE", break_flow)
-
         # If the flow hasn't been broken, then we are done.
         if not break_flow:
             self.flow.finished = timezone.now()
@@ -72,22 +69,18 @@ class WorkflowExecutor:
         # Get all of the steps that need to be executed.
         current_steps = self.get_current_steps()
 
-        print("CURRENT STEPS", [step.step_id for step in current_steps])
-
         # If there is nothing to execute, then we are done.
         if not current_steps:
             return break_flow
 
         # Execute the steps.
         for current_step in current_steps:
-            print("Current Step", current_step.step_id)
             current_step_break_flow, first_run = self.execute_step(
                 user=user,
                 step=current_step,
                 break_flow=break_flow,
                 first_run=first_run,
             )
-            print("Break flow?", current_step_break_flow)
             # We want to toggle break_flow to True, but not back to False.
             if current_step_break_flow:
                 break_flow = True
@@ -153,7 +146,6 @@ class WorkflowExecutor:
                 )
             for workflow_step in self.flow.workflow.steps:
                 if workflow_step.step_id in targets:
-                    print("Creating task for", workflow_step.step_id)
                     self.get_or_create_task_record(step=workflow_step)
 
         if step.break_flow and not first_run:
