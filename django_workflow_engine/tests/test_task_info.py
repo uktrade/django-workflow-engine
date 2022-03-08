@@ -3,12 +3,13 @@ from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.tests.utils import set_up_flow
 
 
-class BasicTask(Task):
-    task_name = "basic_task"
+class TaskInfoTask(Task):
+    task_name = "task_info_task"
     auto = True
 
     def execute(self, task_info):
-        return None, {}, task_info["task_finished"]
+        print("Task name: ", task_info["task_name"])
+        return None, {}, True
 
 
 @pytest.mark.django_db
@@ -17,12 +18,28 @@ def test_workflow_creation(settings):
         name="test_workflow",
         steps=[
             Step(
-                step_id="test_task",
-                task_name="basic_task",
+                step_id="test_task_1",
+                task_name="task_info_task",
                 start=True,
+                targets=["test_task_2"],
+                task_info={
+                    "task_name": "Test task 1",
+                },
+            ),
+            Step(
+                step_id="test_task_2",
+                task_name="task_info_task",
+                targets=["test_task_3"],
+                task_info={
+                    "task_name": "Test task 2",
+                },
+            ),
+            Step(
+                step_id="test_task_3",
+                task_name="task_info_task",
                 targets=COMPLETE,
                 task_info={
-                    "task_finished": True,
+                    "task_name": "Test task 3",
                 },
             ),
         ],
