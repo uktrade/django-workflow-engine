@@ -1,8 +1,6 @@
 import pytest
-
-from django_workflow_engine import Workflow, Step, Task, COMPLETE
+from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.models import TaskRecord
-
 from django_workflow_engine.tests.utils import set_up_flow
 
 
@@ -11,7 +9,7 @@ class BasicTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return None, {}
+        return None, {}, True
 
 
 @pytest.mark.django_db(transaction=True)
@@ -40,7 +38,7 @@ def test_parallel_path_join_up_workflow(settings):
                 task_name="basic_task",
                 targets=COMPLETE,
             ),
-        ]
+        ],
     )
 
     flow, executor, test_user = set_up_flow(

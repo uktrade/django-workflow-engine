@@ -1,9 +1,9 @@
 import uuid
 
 from django.conf import settings
-from django.shortcuts import reverse
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.shortcuts import reverse
 
 from django_workflow_engine.exceptions import WorkflowImproperlyConfigured
 from django_workflow_engine.utils import lookup_workflow
@@ -37,7 +37,7 @@ class Flow(models.Model):
 
     @property
     def current_task_record(self):
-        return self.tasks.filter(finished_at__isnull=True).first()
+        return self.tasks.filter(executed_at__isnull=True).first()
 
     # TODO: rename
     @property
@@ -69,7 +69,7 @@ class Flow(models.Model):
 class TaskRecord(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     started_at = models.DateTimeField(auto_now_add=True)
-    finished_at = models.DateTimeField(null=True)
+    executed_at = models.DateTimeField(null=True)
     executed_by = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
@@ -80,6 +80,7 @@ class TaskRecord(models.Model):
     step_id = models.CharField(max_length=100)
     task_name = models.CharField(max_length=100)
     task_info = models.JSONField(default=dict)
+    done = models.BooleanField(default=False)
     broke_flow = models.BooleanField(default=False)
 
     def __str__(self):

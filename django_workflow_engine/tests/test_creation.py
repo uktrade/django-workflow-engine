@@ -1,6 +1,5 @@
 import pytest
-
-from django_workflow_engine import Workflow, Step, Task, COMPLETE
+from django_workflow_engine import COMPLETE, Step, Task, Workflow
 from django_workflow_engine.tests.utils import set_up_flow
 
 
@@ -9,7 +8,7 @@ class BasicTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return None, {}
+        return None, {}, True
 
 
 @pytest.mark.django_db
@@ -23,7 +22,7 @@ def test_workflow_creation(settings):
                 start=True,
                 targets=COMPLETE,
             ),
-        ]
+        ],
     )
 
     flow, executor, test_user = set_up_flow(

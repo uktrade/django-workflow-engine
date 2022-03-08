@@ -120,7 +120,7 @@ class FlowContinueView(View):
                         task_name=self.step.task_name,
                         step_id=self.step.step_id,
                         executed_by=None,
-                        finished_at=None,
+                        executed_at=None,
                         defaults={"task_info": self.step.task_info or {}},
                     )
                     break
@@ -140,7 +140,9 @@ class FlowContinueView(View):
         executor = WorkflowExecutor(self.flow)
         try:
             executor.run_flow(
-                user=self.request.user, task_info=self.request.POST, task_uuids=[task_uuid,]
+                user=self.request.user,
+                task_info=self.request.POST,
+                task_uuids=[task_uuid],
             )
         except WorkflowNotAuthError as e:
             logger.warning(f"{e}")
@@ -206,7 +208,8 @@ def step_to_node(flow, step):
     targets = step.targets
 
     end = not bool(targets)
-    done = latest_step_task and bool(latest_step_task.finished_at)
+    done = latest_step_task and latest_step_task.executed_at
+    current = latest_step_task and not latest_step_task.executed_at
 
     label = step.description or format_step_id(step.step_id)
     if end and done:
@@ -220,7 +223,7 @@ def step_to_node(flow, step):
             "end": end,
             "decision": len(targets) > 1,
             "done": done,
-            "current": latest_step_task and not latest_step_task.finished_at,
+            "current": current,
         }
     }
 
