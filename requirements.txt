@@ -2,5 +2,6 @@
 
 pytest-django
 factory_boy
+django-stubs
 tox==3.24.4
 build==0.7.0

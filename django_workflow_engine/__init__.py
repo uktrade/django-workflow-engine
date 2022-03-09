@@ -16,12 +16,17 @@ from django_workflow_engine.tasks import Task
 from django_workflow_engine.tasks import SendEmail, EmailFormTask, TaskError
 """
 # Workflow definition
+from typing import Literal
+
 from .dataclass import Step, Workflow
+
 # Workflow execution
 from .exceptions import WorkflowError, WorkflowNotAuthError
+
 # Workflow url generation
 from .generate_urls import workflow_urls
+
 # Framework built-ins
 from .tasks import EmailFormTask, SendEmail, Task, TaskError
 
-COMPLETE = "complete"
+COMPLETE: Literal["complete"] = "complete"

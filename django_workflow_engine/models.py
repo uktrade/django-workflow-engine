@@ -3,7 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.shortcuts import reverse
+from django.urls import reverse
 
 from django_workflow_engine.exceptions import WorkflowImproperlyConfigured
 from django_workflow_engine.utils import lookup_workflow

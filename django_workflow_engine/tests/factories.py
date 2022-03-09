@@ -1,11 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from django.contrib.auth import get_user_model
-from django_workflow_engine import COMPLETE
-from django_workflow_engine.dataclass import Step, Workflow
-from django_workflow_engine.tasks.task import Task
-from django_workflow_engine.tests.tasks import BasicTask
-from factory import Factory, Sequence, post_generation
+from factory import Sequence
 from factory.django import DjangoModelFactory
 
 if TYPE_CHECKING:

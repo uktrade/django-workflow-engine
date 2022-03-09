@@ -3,7 +3,7 @@
 Dataclasses that are used to define a custom workflow and its steps.
 """
 from dataclasses import dataclass, field
-from typing import Optional, Type
+from typing import List, Literal, Optional, Type, Union
 
 from django_workflow_engine.tasks import Task
 
@@ -12,11 +12,11 @@ from django_workflow_engine.tasks import Task
 class Step:
     step_id: str
     task_name: str
-    targets: Optional[list[str]]
+    targets: Union[List[str], Literal["complete"]]
     start: Optional[bool] = None
     task_info: Optional[dict] = None
     description: Optional[str] = None
-    groups: list[str] = field(default_factory=list)
+    groups: List[str] = field(default_factory=list)
     no_log: Optional[bool] = False
     break_flow: Optional[bool] = False
 

@@ -4,7 +4,7 @@ A task is an instance of a django_workflow_engine.dataclasses.Step
 """
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Tuple, Type, Union
 
 if TYPE_CHECKING:
     from django_workflow_engine.models import Flow, TaskRecord
@@ -31,7 +31,7 @@ class Task(ABC):
         task_name: The name which will be used to map to the task class in `tasks`.
     """
 
-    tasks: dict[str, "Task"] = {}
+    tasks: dict[str, Type["Task"]] = {}
 
     auto: bool = False
     abstract: bool = False
