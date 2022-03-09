@@ -1,6 +1,7 @@
 import logging
 from typing import TYPE_CHECKING, List, Tuple, Type
 
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django_workflow_engine import COMPLETE
@@ -8,9 +9,13 @@ from django_workflow_engine.exceptions import WorkflowError, WorkflowNotAuthErro
 from django_workflow_engine.models import Target, TaskRecord
 
 if TYPE_CHECKING:
+    from django.contrib.auth.models import User
+
     from django_workflow_engine.dataclass import Step
     from django_workflow_engine.models import Flow
     from django_workflow_engine.tasks.task import Task
+else:
+    User = get_user_model()
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +25,7 @@ class WorkflowExecutor:
     def __init__(self, flow: "Flow"):
         self.flow: "Flow" = flow
 
-    def run_flow(self, user):
+    def run_flow(self, user: User) -> None:
         """
         Run the workflow.
 
@@ -54,7 +59,7 @@ class WorkflowExecutor:
 
     def execute_steps(
         self,
-        user,
+        user: User,
         break_flow: bool,
         first_run: bool,
     ) -> bool:
@@ -101,7 +106,7 @@ class WorkflowExecutor:
 
     def execute_step(
         self,
-        user,
+        user: User,
         step: "Step",
         break_flow: bool,
         first_run: bool,
@@ -194,7 +199,7 @@ class WorkflowExecutor:
         return current_steps
 
     @staticmethod
-    def check_authorised(user, step: "Step"):
+    def check_authorised(user: User, step: "Step"):
         """Check if a user is authorised to execute a workflow step.
 
         If no groups are defined on the step, the check will pass and permission will be

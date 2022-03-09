@@ -41,7 +41,7 @@ class FlowView(DetailView):
 
 
 class FlowCreateForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.fields["workflow_name"] = forms.ChoiceField(
             choices=build_workflow_choices(settings.DJANGO_WORKFLOWS)
@@ -108,18 +108,19 @@ class FlowContinueView(TemplateView):
         next_steps: List[Step] = self.workflow_executor.get_current_steps()
         self.authorised_next_steps: List[Step] = []
 
-        # Build a list of the next steps that the user is authorised to action.
-        for next_step in next_steps:
-            try:
-                self.workflow_executor.check_authorised(
-                    request.user,
-                    next_step,
-                )
-            except WorkflowNotAuthError:
-                # User not authorised, skip this step
-                continue
+        if request.user.is_authenticated:
+            # Build a list of the next steps that the user is authorised to action.
+            for next_step in next_steps:
+                try:
+                    self.workflow_executor.check_authorised(
+                        request.user,
+                        next_step,
+                    )
+                except WorkflowNotAuthError:
+                    # User not authorised, skip this step
+                    continue
 
-            self.authorised_next_steps.append(next_step)
+                self.authorised_next_steps.append(next_step)
 
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
@@ -135,6 +136,8 @@ class FlowContinueView(TemplateView):
         return None
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        user = cast(User, request.user)
+
         step_id = request.POST.get("step_id", None)
         if not step_id:
             return redirect("flow-continue", pk=self.flow.pk)
@@ -145,7 +148,7 @@ class FlowContinueView(TemplateView):
 
         try:
             self.workflow_executor.execute_step(
-                user=self.request.user,
+                user=user,
                 step=step,
                 break_flow=False,
                 first_run=False,
