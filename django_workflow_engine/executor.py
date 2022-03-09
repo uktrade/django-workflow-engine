@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List, Tuple, Type
 
 from django.utils import timezone
 
@@ -115,7 +115,10 @@ class WorkflowExecutor:
         task_record, _ = self.get_or_create_task_record(step=step)
 
         # Get the task for the current step
-        task: "Task" = step.task(user, task_record, self.flow)
+        step_task: Type["Task"] = step.task
+        # Instantiate the Task
+        task = step_task(user, task_record, self.flow)
+        # Setup the Task.
         task.setup(task_record.task_info)
 
         # Check if this task is automatic or manual
