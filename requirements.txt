@@ -1,5 +1,6 @@
 -e .
 
 pytest-django
+factory_boy
 tox==3.24.4
 build==0.7.0
