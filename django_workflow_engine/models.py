@@ -82,6 +82,10 @@ class TaskRecord(models.Model):
     task_info = models.JSONField(default=dict)
     done = models.BooleanField(default=False)
     broke_flow = models.BooleanField(default=False)
+    # pool = models.CharField(max_length=100)
+    # lane = models.CharField(max_length=100)
+    # description = models.CharField(max_length=100)
+    # decision_text = models.CharField(max_length=100)
 
     def __str__(self):
         return f"{self.step_id} {self.task_name}"

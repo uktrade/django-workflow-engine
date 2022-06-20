@@ -19,6 +19,10 @@ class Step:
     groups: list[str] = field(default_factory=list)
     no_log: Optional[bool] = False
     break_flow: Optional[bool] = False
+    pool: Optional[str] = None
+    lane: Optional[str] = None
+    description: Optional[str] = None
+    decision_text: Optional[str] = None
 
     @property
     def task(self):

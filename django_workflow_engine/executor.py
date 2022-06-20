@@ -68,6 +68,10 @@ class WorkflowExecutor:
                 executed_at=None,
                 defaults={"task_info": current_task_info},
                 broke_flow=current_step.break_flow,
+                pool=current_step.step_id,
+                lane=current_step.step_id,
+                description=current_step.step_id,
+                decision_text=current_step.step_id,
             )
 
             task = current_step.task(user, task_record, self.flow)
