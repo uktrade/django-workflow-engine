@@ -4,3 +4,5 @@ pytest-django
 tox==3.24.4
 build==0.7.0
 shortuuid
+networkx
+git+https://github.com/soniaradon/bpmn-python

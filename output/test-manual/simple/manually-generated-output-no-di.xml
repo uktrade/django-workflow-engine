@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.signavio.com/bpmn20" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <process id="id50ad0216-7610-47b9-8491-ce9ac543cd6b" isClosed="false" isExecutable="false" processType="None">
+    <startEvent id="id1315e192-0af9-4721-93fd-adde280f71b3" name="start_event" parallelMultiple="false" isInterrupting="true">
+      <outgoing>id4e334127-5f9d-4cc9-8ece-067766b2a251</outgoing>
+    <timerEventDefinition id="id603c5b64-c403-4e96-9556-da1586bb7f3d" />
+    </startEvent>
+  <task id="ida45c3cd0-003c-4d90-8471-a984e7c5a90c" name="task1">
+      <incoming>id4e334127-5f9d-4cc9-8ece-067766b2a251</incoming>
+    <outgoing>idac0834f5-e0fb-4d12-8f48-c261ff4f5c28</outgoing>
+    </task>
+  <exclusiveGateway id="idad3c138f-7e8a-4a63-81f7-b0b7c59abfb5" name="exclusive_gate_fork" gatewayDirection="Unspecified">
+      <incoming>idac0834f5-e0fb-4d12-8f48-c261ff4f5c28</incoming>
+    <outgoing>id06534a5d-1daf-461c-8e60-d12f02a6343a</outgoing>
+    <outgoing>idc449e3f1-103f-4b4e-aaf0-66daa1924383</outgoing>
+    </exclusiveGateway>
+  <task id="idb47cecd2-6d9b-4289-8693-f2d0f6b16e36" name="task1_ex">
+      <incoming>id06534a5d-1daf-461c-8e60-d12f02a6343a</incoming>
+    <outgoing>id528b1265-44d4-43a9-b17a-3edbe5d6d244</outgoing>
+    </task>
+  <task id="id50a5495f-66fe-4c15-b273-0c95db9651ef" name="task2_ex">
+      <incoming>idc449e3f1-103f-4b4e-aaf0-66daa1924383</incoming>
+    <outgoing>id13901e32-089b-4ef3-9d55-a118f3ba8dd4</outgoing>
+    </task>
+  <exclusiveGateway id="id1a148de7-a173-4ad4-81ee-e3b16dbb859e" name="exclusive_gate_join" gatewayDirection="Unspecified">
+      <incoming>id528b1265-44d4-43a9-b17a-3edbe5d6d244</incoming>
+    <incoming>id13901e32-089b-4ef3-9d55-a118f3ba8dd4</incoming>
+    <outgoing>id98e8d054-c7a4-4266-8215-f498d0f0e124</outgoing>
+    </exclusiveGateway>
+  <task id="id8ed74c02-8c97-498f-a346-d6578cf75dd6" name="task2">
+      <incoming>id98e8d054-c7a4-4266-8215-f498d0f0e124</incoming>
+    <outgoing>ida9383eae-e9c5-4aa8-91d0-35f1f27081ec</outgoing>
+    </task>
+  <endEvent id="id2e460549-6f5b-4d49-9e55-8413b5990e60" name="end_event">
+      <incoming>ida9383eae-e9c5-4aa8-91d0-35f1f27081ec</incoming>
+    <messageEventDefinition id="id05a3fd92-c658-4a81-9f0e-09454e467b3f" />
+    </endEvent>
+  <sequenceFlow id="id4e334127-5f9d-4cc9-8ece-067766b2a251" name="start_to_one" sourceRef="id1315e192-0af9-4721-93fd-adde280f71b3" targetRef="ida45c3cd0-003c-4d90-8471-a984e7c5a90c" />
+  <sequenceFlow id="idac0834f5-e0fb-4d12-8f48-c261ff4f5c28" name="one_to_ex_fork" sourceRef="ida45c3cd0-003c-4d90-8471-a984e7c5a90c" targetRef="idad3c138f-7e8a-4a63-81f7-b0b7c59abfb5" />
+  <sequenceFlow id="id06534a5d-1daf-461c-8e60-d12f02a6343a" name="ex_fork_to_ex_one" sourceRef="idad3c138f-7e8a-4a63-81f7-b0b7c59abfb5" targetRef="idb47cecd2-6d9b-4289-8693-f2d0f6b16e36" />
+  <sequenceFlow id="idc449e3f1-103f-4b4e-aaf0-66daa1924383" name="ex_fork_to_ex_two" sourceRef="idad3c138f-7e8a-4a63-81f7-b0b7c59abfb5" targetRef="id50a5495f-66fe-4c15-b273-0c95db9651ef" />
+  <sequenceFlow id="id528b1265-44d4-43a9-b17a-3edbe5d6d244" name="ex_one_to_ex_join" sourceRef="idb47cecd2-6d9b-4289-8693-f2d0f6b16e36" targetRef="id1a148de7-a173-4ad4-81ee-e3b16dbb859e" />
+  <sequenceFlow id="id13901e32-089b-4ef3-9d55-a118f3ba8dd4" name="ex_two_to_ex_join" sourceRef="id50a5495f-66fe-4c15-b273-0c95db9651ef" targetRef="id1a148de7-a173-4ad4-81ee-e3b16dbb859e" />
+  <sequenceFlow id="id98e8d054-c7a4-4266-8215-f498d0f0e124" name="ex_join_to_two" sourceRef="id1a148de7-a173-4ad4-81ee-e3b16dbb859e" targetRef="id8ed74c02-8c97-498f-a346-d6578cf75dd6" />
+  <sequenceFlow id="ida9383eae-e9c5-4aa8-91d0-35f1f27081ec" name="two_to_end" sourceRef="id8ed74c02-8c97-498f-a346-d6578cf75dd6" targetRef="id2e460549-6f5b-4d49-9e55-8413b5990e60" />
+  </process>
+</definitions>
