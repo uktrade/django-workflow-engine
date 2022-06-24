@@ -14,6 +14,7 @@ class Step:
     task_name: str
     label: str
     targets: Optional[list[str]]
+    condition: bool = False
     start: Optional[bool] = None
     task_info: Optional[dict] = None
     description: Optional[str] = None

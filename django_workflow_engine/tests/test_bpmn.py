@@ -69,89 +69,279 @@ def test_bpmn_xml_export(settings):
         ],
     )
 
-    # test_workflow = Workflow(
-    #     name="test_workflow",
-    #     steps=[
-    #         Step(
-    #             pool="Test",
-    #             lane="HR",
-    #             # task_icon="",
-    #             step_id="test_task_1",
-    #             task_name="task_info_task",
-    #             label="HR task",
-    #             start=True,
-    #             targets=["test_task_2"],
-    #             decision_text="Passed credit check?",
-    #             description="Blah blah",
-    #             task_info={
-    #                 "task_name": "Test task 1",
-    #             },
-    #         ),
-    #         Step(
-    #             pool="Test",
-    #             lane="HR",
-    #             # task_icon="",
-    #             step_id="test_task_2",
-    #             task_name="task_info_task",
-    #             label="Finance task",
-    #             targets=[COMPLETE,],
-    #             task_info={
-    #                 "task_name": "Test task 4",
-    #             },
-    #         ),
-    #     ],
-    # )
+    test_workflow = Workflow(
+        name="test_workflow",
+        steps=[
+            Step(
+                pool="Test",
+                lane="HR",
+                # task_icon="",
+                step_id="test_task_1",
+                task_name="task_info_task",
+                label="HR task",
+                start=True,
+                targets=["test_task_2"],
+                decision_text="Passed credit check?",
+                description="Blah blah",
+                task_info={
+                    "task_name": "Test task 1",
+                },
+            ),
+            Step(
+                pool="Test",
+                lane="HR",
+                # task_icon="",
+                step_id="test_task_2",
+                task_name="task_info_task",
+                label="Finance task",
+                targets=[COMPLETE,],
+                task_info={
+                    "task_name": "Test task 4",
+                },
+            ),
+        ],
+    )
+
+    test_workflow = Workflow(
+        name="leaving",
+        steps=[
+            # Leaver
+            Step(
+                label="Setup leaving",
+                step_id="setup_leaving",
+                task_name="basic_task",
+                start=True,
+                targets=[
+                    "check_uksbs_line_manager",
+                ],
+            ),
+            Step(
+                label="Check UKSBS line manager",
+                step_id="check_uksbs_line_manager",
+                task_name="check_uksbs_line_manager",
+                targets=[
+                    #"send_line_manager_correction_reminder",
+                    "notify_line_manager",
+                ],
+            ),
+            Step(
+                label="Send line manager correction reminder",
+                step_id="send_line_manager_correction_reminder",
+                task_name="reminder_email",
+                targets=[
+                    "check_uksbs_line_manager",
+                ],
+                break_flow=True,
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            # Line manager
+            Step(
+                label="Notify line manager",
+                step_id="notify_line_manager",
+                task_name="notification_email",
+                targets=[
+                    "has_line_manager_completed",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            Step(
+                label="Has line manager completed?",
+                step_id="has_line_manager_completed",
+                task_name="has_line_manager_completed",
+                targets=[
+                    #"send_line_manager_reminder",
+                    "thank_line_manager",
+                ],
+            ),
+            Step(
+                label="Send line manager reminder",
+                step_id="send_line_manager_reminder",
+                task_name="reminder_email",
+                targets=[
+                    "has_line_manager_completed",
+                ],
+                break_flow=True,
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            Step(
+                label="Thank line manager",
+                step_id="thank_line_manager",
+                task_name="notification_email",
+                targets=[
+                    "send_uksbs_leaver_details",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            # UK SBS
+            Step(
+                label="Send UKSBS leaver details",
+                step_id="send_uksbs_leaver_details",
+                task_name="send_uksbs_leaver_details",
+                targets=[
+                    "setup_scheduled_tasks",
+                ],
+            ),
+            # Split flow
+            Step(
+                label="Setup scheduled tasks",
+                step_id="setup_scheduled_tasks",
+                task_name="basic_task",
+                targets=[
+                    "send_service_now_leaver_details",
+                    "send_lsd_team_leaver_details",
+                    "notify_csu4_of_leaving",
+                    "notify_csu4_of_leaving",
+                    "notify_ocs_of_leaving",
+                    "notify_ocs_of_oab_locker",
+                    "send_security_notification",
+                    "is_it_leaving_date_plus_x",
+                ],
+            ),
+            # Service Now
+            Step(
+                label="Send Service Now leaver details",
+                step_id="send_service_now_leaver_details",
+                task_name="send_service_now_leaver_details",
+                targets=[
+                    "are_all_tasks_complete",
+                ],
+            ),
+            # LSD
+            Step(
+                label="Send LSD team leaver details",
+                step_id="send_lsd_team_leaver_details",
+                task_name="send_lsd_team_leaver_details",
+                targets=[
+                    "are_all_tasks_complete",
+                ],
+            ),
+            # CSU4
+            Step(
+                label="Notify CSU4 of leaving",
+                step_id="notify_csu4_of_leaving",
+                task_name="notification_email",
+                targets=[
+                    "are_all_tasks_complete",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            # OCS
+            Step(
+                label="Notify OCS of leaving",
+                step_id="notify_ocs_of_leaving",
+                task_name="notification_email",
+                targets=[
+                    "are_all_tasks_complete",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            # OCS OAB Lockers
+            Step(
+                label="Notify OCS of OAB locker",
+                step_id="notify_ocs_of_oab_locker",
+                task_name="notification_email",
+                targets=[
+                    "are_all_tasks_complete",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+            ),
+            # SECURITY
+            Step(
+                label="Send security notification",
+                step_id="send_security_notification",
+                task_name="notification_email",
+                targets=[
+                    "have_security_carried_out_leaving_tasks",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+                break_flow=True,
+            ),
+            Step(
+                label="Have security carried out leaving tasks?",
+                condition=True,
+                step_id="have_security_carried_out_leaving_tasks",
+                task_name="have_security_carried_out_leaving_tasks",
+                targets=[
+                    #"send_security_reminder",
+                    "are_all_tasks_complete",
+                ],
+            ),
+            Step(
+                label="Send security reminder",
+                step_id="send_security_reminder",
+                task_name="reminder_email",
+                targets=[
+                    "have_security_carried_out_leaving_tasks",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+                break_flow=True,
+            ),
+            # SRE
+            Step(
+                label="Is it leaving date plus x?",
+                step_id="is_it_leaving_date_plus_x",
+                task_name="is_it_leaving_date_plus_x",
+                targets=[
+                    "send_sre_slack_message",
+                ],
+                break_flow=True,
+            ),
+            Step(
+                label="Send SRE Slack message",
+                step_id="send_sre_slack_message",
+                task_name="send_sre_slack_message",
+                targets=[
+                    "have_sre_carried_out_leaving_tasks",
+                ],
+            ),
+            Step(
+                label="Have SRE carried out leaving tasks?",
+                step_id="have_sre_carried_out_leaving_tasks",
+                task_name="have_sre_carried_out_leaving_tasks",
+                targets=[
+                    #"send_sre_reminder",
+                    "are_all_tasks_complete",
+                ],
+            ),
+            Step(
+                label="Send SRE reminder",
+                step_id="send_sre_reminder",
+                task_name="reminder_email",
+                targets=[
+                    "have_sre_carried_out_leaving_tasks",
+                ],
+                task_info={
+                    "email_id": "",
+                },
+                break_flow=True,
+            ),
+            # End
+            Step(
+                label="Are all tasks completed?",
+                step_id="are_all_tasks_complete",
+                task_name="leaver_complete",
+                targets=[COMPLETE],
+            ),
+        ],
+    )
 
     exporter = WorkflowExporter(test_workflow)
     exporter.export_bpmn()
-
-
-import bpmn_python.bpmn_diagram_layouter as layouter
-import bpmn_python.bpmn_diagram_visualizer as visualizer
-import bpmn_python.bpmn_diagram_rep as diagram
-
-output_directory = "./output/test-manual/simple/"
-output_file_with_di = "manually-generated-output.xml"
-output_file_no_di = "manually-generated-output-no-di.xml"
-output_dot_file = "manually-generated-example"
-output_png_file = "manually-generated-example"
-
-
-def test_create_diagram_manually():
-    bpmn_graph = diagram.BpmnDiagramGraph()
-    bpmn_graph.create_new_diagram_graph(diagram_name="diagram1")
-    process_id = bpmn_graph.add_process_to_diagram()
-    [start_id, _] = bpmn_graph.add_start_event_to_diagram(
-        process_id, start_event_name="start_event",
-        start_event_definition="timer"
-    )
-    [task1_id, _] = bpmn_graph.add_task_to_diagram(process_id, task_name="task1")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, start_id, task1_id, "start_to_one")
-
-    [exclusive_gate_fork_id, _] = bpmn_graph.add_exclusive_gateway_to_diagram(process_id,
-                                                                              gateway_name="exclusive_gate_fork")
-    [task1_ex_id, _] = bpmn_graph.add_task_to_diagram(process_id, task_name="task1_ex")
-    [task2_ex_id, _] = bpmn_graph.add_task_to_diagram(process_id, task_name="task2_ex")
-    [exclusive_gate_join_id, _] = bpmn_graph.add_exclusive_gateway_to_diagram(process_id,
-                                                                              gateway_name="exclusive_gate_join")
-
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, task1_id, exclusive_gate_fork_id, "one_to_ex_fork")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, exclusive_gate_fork_id, task1_ex_id, "ex_fork_to_ex_one")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, exclusive_gate_fork_id, task2_ex_id, "ex_fork_to_ex_two")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, task1_ex_id, exclusive_gate_join_id, "ex_one_to_ex_join")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, task2_ex_id, exclusive_gate_join_id, "ex_two_to_ex_join")
-
-    [task2_id, _] = bpmn_graph.add_task_to_diagram(process_id, task_name="task2")
-    [end_id, _] = bpmn_graph.add_end_event_to_diagram(process_id, end_event_name="end_event",
-                                                      end_event_definition="message")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, exclusive_gate_join_id, task2_id, "ex_join_to_two")
-    bpmn_graph.add_sequence_flow_to_diagram(process_id, task2_id, end_id, "two_to_end")
-
-    layouter.generate_layout(bpmn_graph)
-
-    bpmn_graph.export_xml_file(output_directory, output_file_with_di)
-    bpmn_graph.export_xml_file_no_di(output_directory, output_file_no_di)
-    # Uncomment line below to get a simple view of created diagram
-    # visualizer.visualize_diagram(bpmn_graph)
-    #visualizer.bpmn_diagram_to_dot_file(bpmn_graph, output_directory + output_dot_file)
-    visualizer.bpmn_diagram_to_png(bpmn_graph, output_directory + output_png_file)
