@@ -1,7 +1,6 @@
 import networkx as nx
 
 import bpmn_python.bpmn_diagram_layouter as layouter
-import bpmn_python.bpmn_diagram_visualizer as visualizer
 import bpmn_python.bpmn_diagram_rep as diagram
 
 
@@ -47,22 +46,17 @@ class WorkflowExporter:
         self.bpmn_graph.create_new_diagram_graph(diagram_name=self.workflow.name)
         self.process_id = self.bpmn_graph.add_process_to_diagram()
 
-        # Create tasks
         id_lookup = {}
-
-        # print(self.dag.nodes)
 
         for node in self.dag.nodes:
             if str(node) == "start":
                 [object_id, _] = self.bpmn_graph.add_start_event_to_diagram(
                     self.process_id, start_event_name="start_event",
-                    #start_event_definition="timer"
                 )
             elif str(node) == "complete":
                 [object_id, _] = self.bpmn_graph.add_end_event_to_diagram(
                     self.process_id,
                     end_event_name="end_event",
-                    #end_event_definition="message",
                 )
             else:
                 step = self.get_step(node)
