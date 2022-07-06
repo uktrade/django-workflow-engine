@@ -11,9 +11,6 @@ class WorkflowExporter:
     output_diagram = True
     complete = []
 
-    current_x = 0
-    current_y = 0
-
     completed_edges = []
 
     def __init__(self, workflow):
@@ -81,30 +78,15 @@ class WorkflowExporter:
                     )
             id_lookup[str(node)] = object_id
 
-        print(id_lookup)
-
-        i = 5
-
         for edge in self.dag.edges:
             from_id = id_lookup[str(edge[0])]
             to_id = id_lookup[str(edge[1])]
 
-            if i == 1:
-                print(f"{edge[0]} :: {edge[1]}")
-                print(f"{from_id} :: {to_id}")
-
-            if i > 0:
-                i = i - 1
-
-            # if i != 0:
-            flow_id = self.bpmn_graph.add_sequence_flow_to_diagram(
+            self.bpmn_graph.add_sequence_flow_to_diagram(
                 self.process_id,
                 from_id,
                 to_id,
-                "", #f"{from_id}_to_{to_id}",
             )
-
-            # print("flow_id", flow_id)
 
         layouter.generate_layout(self.bpmn_graph)
 
