@@ -7,11 +7,19 @@ simple_workflow = Workflow(
         Step(
             step_id="log_hello_world",
             task_name="log_message",
-            targets="complete",
+            targets=["log_name"],
             start=True,
             task_info={
                 "message": "Hello World!",
             },
-        )
+        ),
+        Step(
+            step_id="log_name",
+            task_name="log_message",
+            targets="complete",
+            task_info={
+                "message": "Sam",
+            },
+        ),
     ],
 )

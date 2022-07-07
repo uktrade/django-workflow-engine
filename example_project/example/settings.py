@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_workflow_engine',
+    'workflow.apps.WorkflowConfig',
 ]
 
 MIDDLEWARE = [
@@ -126,5 +127,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Django workflow engine
 DJANGO_WORKFLOWS = {
-    "Simple workflow": "workflow.workflows.simple_workflow",
+    "simple_workflow": "workflow.workflows.simple_workflow",
 }
