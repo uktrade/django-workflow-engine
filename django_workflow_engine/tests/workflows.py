@@ -110,7 +110,6 @@ reminder_workflow = Workflow(
             step_id="remind_creator",
             task_name=BasicTask.task_name,
             targets=["was_user_created"],
-            break_flow=True,
         ),
         Step(
             step_id="notify_creator",

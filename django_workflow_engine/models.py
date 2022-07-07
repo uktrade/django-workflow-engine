@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 
+from django_workflow_engine.dataclass import Workflow
 from django_workflow_engine.exceptions import WorkflowImproperlyConfigured
 from django_workflow_engine.utils import lookup_workflow
 
@@ -33,7 +34,7 @@ class Flow(models.Model):
         return bool(self.finished)
 
     @property
-    def workflow(self):
+    def workflow(self) -> Workflow:
         return lookup_workflow(self.workflow_name)
 
     @property
@@ -82,7 +83,6 @@ class TaskRecord(models.Model):
     task_name = models.CharField(max_length=100)
     task_info = models.JSONField(default=dict)
     done = models.BooleanField(default=False)
-    broke_flow = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.step_id} {self.task_name}"

@@ -4,6 +4,8 @@ import sys
 
 from django.conf import settings
 
+from django_workflow_engine.dataclass import Workflow
+
 from .exceptions import WorkflowImproperlyConfigured
 
 
@@ -24,7 +26,7 @@ def build_workflow_choices(workflows):
     return choices
 
 
-def lookup_workflow(workflow_name):
+def lookup_workflow(workflow_name) -> Workflow:
     """Look up workflow class.
 
     Given the configured workflows and a workflow name, returns the associated
@@ -43,7 +45,7 @@ def lookup_workflow(workflow_name):
     raise WorkflowImproperlyConfigured(f"Cannot find workflow: {display_name}")
 
 
-def load_workflow(workflow_key):
+def load_workflow(workflow_key) -> Workflow:
     """Load a workflow class.
 
     Given a workflow path, extrapolates the containing package/modules, imports
