@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from django_workflow_engine.tasks.task import Task
 
 User = get_user_model()
@@ -31,3 +32,33 @@ class WasUserCreatedTask(Task):
             return ["remind_creator"], False
 
         return ["notify_creator"], True
+
+
+class WasUserCreatedTaskA(Task):
+    task_name = "was_user_created_task_a"
+    auto = True
+
+    def execute(self, task_info):
+        user = User.objects.filter(
+            first_name="Sam",
+        ).first()
+
+        if not user:
+            return ["task_a_remind_creator"], False
+
+        return ["task_a_notify_creator"], True
+
+
+class WasUserCreatedTaskB(Task):
+    task_name = "was_user_created_task_b"
+    auto = True
+
+    def execute(self, task_info):
+        user = User.objects.filter(
+            first_name="Sam",
+        ).first()
+
+        if not user:
+            return ["task_b_remind_creator"], False
+
+        return ["task_b_notify_creator"], True

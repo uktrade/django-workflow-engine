@@ -1,6 +1,7 @@
 import logging
 
 import pytest
+
 from django_workflow_engine.models import TaskRecord
 from django_workflow_engine.tests.factories import UserFactory
 from django_workflow_engine.tests.utils import set_up_flow
@@ -19,6 +20,7 @@ def test_reminder_style_workflow(settings):
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
+
     assert TaskRecord.objects.count() == 4
     assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 

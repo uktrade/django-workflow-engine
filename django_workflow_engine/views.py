@@ -150,8 +150,6 @@ class FlowContinueView(TemplateView):
             self.workflow_executor.execute_step(
                 user=user,
                 step=step,
-                break_flow=False,
-                first_run=False,
             )
         except WorkflowNotAuthError as e:
             logger.warning(f"{e}")

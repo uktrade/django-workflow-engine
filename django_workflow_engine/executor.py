@@ -43,33 +43,24 @@ class WorkflowExecutor:
         self.flow.save(update_fields=["running"])
 
         # Progress the workflow
-        break_flow = self.execute_steps(
-            user=user,
-            break_flow=False,
-            first_run=True,
-        )
+        self.execute_steps(user=user)
 
-        # If the flow hasn't been broken, then we are done.
-        if not break_flow:
+        # If the flow has no remaining steps, then we are done.
+        remaining_steps = self.get_current_steps()
+        if not remaining_steps:
             self.flow.finished = timezone.now()
 
         # Mark the flow as not running, so that it can be picked up again.
         self.flow.running = False
         self.flow.save(update_fields=["running"])
 
-    def execute_steps(
-        self,
-        user: User,
-        break_flow: bool,
-        first_run: bool,
-    ) -> bool:
+    def execute_steps(self, user: User):
         """
         Execute any steps that have not been complete.
 
-        This function is recursive/self referencing, this means it can cause an
-        infinite loop if there is a loop in the workflow without "break_flow"
-        being used correctly.
+        This function is recursive/self referencing.
         """
+        break_flow: bool = False
 
         # Get all of the steps that need to be executed.
         current_steps = self.get_current_steps()
@@ -80,12 +71,7 @@ class WorkflowExecutor:
 
         # Execute the steps.
         for current_step in current_steps:
-            current_step_break_flow, first_run = self.execute_step(
-                user=user,
-                step=current_step,
-                break_flow=break_flow,
-                first_run=first_run,
-            )
+            current_step_break_flow = self.execute_step(user=user, step=current_step)
             # We want to toggle break_flow to True, but not back to False.
             if current_step_break_flow:
                 break_flow = True
@@ -93,29 +79,22 @@ class WorkflowExecutor:
         # If we have broken the flow, then we are done, any remaining tasks will
         # be picked up next time.
         if break_flow:
-            return break_flow
+            return None
 
         # Call this function again to execute the next steps.
-        break_flow = self.execute_steps(
-            user=user,
-            break_flow=break_flow,
-            first_run=first_run,
-        )
-
-        return break_flow
+        self.execute_steps(user=user)
 
     def execute_step(
         self,
         user: User,
         step: "Step",
-        break_flow: bool,
-        first_run: bool,
-    ) -> Tuple[bool, bool]:
+    ) -> bool:
         """
         Execute the task for the given step.
 
         Generate any of the resulting tasks.
         """
+        break_flow: bool = False
 
         task_record, _ = self.get_or_create_task_record(step=step)
 
@@ -128,7 +107,7 @@ class WorkflowExecutor:
 
         # Check if this task is automatic or manual
         if not task.auto:
-            return break_flow, first_run
+            return break_flow
 
         # Raises if user not authorised for step
         self.check_authorised(user, step)
@@ -156,12 +135,11 @@ class WorkflowExecutor:
                 if workflow_step.step_id in targets:
                     self.get_or_create_task_record(step=workflow_step)
 
-        if step.break_flow and not first_run:
+        # Break the flow if this task is the last in a loop.
+        if self.flow.workflow.step_last_in_loop(step.step_id):
             break_flow = True
-        else:
-            first_run = False
 
-        return break_flow, first_run
+        return break_flow
 
     def get_or_create_task_record(self, step: "Step") -> Tuple[TaskRecord, bool]:
         """
@@ -175,7 +153,6 @@ class WorkflowExecutor:
             executed_by=None,
             executed_at=None,
             defaults={"task_info": step.task_info or {}},
-            broke_flow=step.break_flow,
         )
         return task_record, created
 

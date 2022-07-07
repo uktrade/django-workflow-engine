@@ -110,10 +110,71 @@ reminder_workflow = Workflow(
             step_id="remind_creator",
             task_name=BasicTask.task_name,
             targets=["was_user_created"],
-            break_flow=True,
         ),
         Step(
             step_id="notify_creator",
+            task_name=BasicTask.task_name,
+            targets=COMPLETE,
+        ),
+    ],
+)
+
+complex_loops_workflow = Workflow(
+    name="reminder_workflow",
+    steps=[
+        Step(
+            step_id="start",
+            task_name=BasicTask.task_name,
+            start=True,
+            targets=["task_a", "task_b"],
+        ),
+        Step(
+            step_id="task_a",
+            task_name=BasicTask.task_name,
+            targets=["task_a_was_user_created"],
+        ),
+        Step(
+            step_id="task_a_was_user_created",
+            task_name="was_user_created_task_a",
+            targets=["task_a_remind_creator", "task_a_notify_creator"],
+        ),
+        Step(
+            step_id="task_a_remind_creator",
+            task_name=BasicTask.task_name,
+            targets=["task_a_was_user_created"],
+        ),
+        Step(
+            step_id="task_a_notify_creator",
+            task_name=BasicTask.task_name,
+            targets=["end"],
+        ),
+        Step(
+            step_id="task_b",
+            task_name=BasicTask.task_name,
+            targets=["task_b_was_user_created"],
+        ),
+        Step(
+            step_id="task_b_was_user_created",
+            task_name="was_user_created_task_b",
+            targets=["task_b_remind_creator", "task_b_notify_creator"],
+        ),
+        Step(
+            step_id="task_b_remind_creator",
+            task_name=BasicTask.task_name,
+            targets=["task_c"],
+        ),
+        Step(
+            step_id="task_c",
+            task_name=BasicTask.task_name,
+            targets=["task_b_was_user_created"],
+        ),
+        Step(
+            step_id="task_b_notify_creator",
+            task_name=BasicTask.task_name,
+            targets=["end"],
+        ),
+        Step(
+            step_id="end",
             task_name=BasicTask.task_name,
             targets=COMPLETE,
         ),
