@@ -49,7 +49,10 @@ class FlowCreateForm(forms.ModelForm):
 
     class Meta:
         model = Flow
-        fields = ["workflow_name", "flow_name"]
+        fields = ["workflow_name", "flow_name", "executed_by"]
+        widgets = {
+            "executed_by": forms.HiddenInput,
+        }
 
 
 class FlowCreateView(CreateView):
@@ -61,6 +64,11 @@ class FlowCreateView(CreateView):
         assert self.object
 
         return reverse("flow", args=[self.object.pk])
+
+    def get_initial(self):
+        return {
+            "executed_by": self.request.user,
+        }
 
     def form_valid(self, form) -> HttpResponse:
         user = cast(User, self.request.user)

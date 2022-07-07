@@ -47,3 +47,15 @@ are responsible for.
 # Applying authorisation to workflow steps
 
 > TODO - describe workflow config for this
+
+# Users
+
+## John Doe
+username: john.doe
+password: yi46zpr0
+description: superuser
+
+## Jane Doe
+username: jane.doe
+password: 5ke46fxv
+description: normal user
