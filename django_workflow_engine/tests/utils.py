@@ -1,29 +1,10 @@
-from django.contrib.auth.models import User
-
-from django_workflow_engine.models import Flow
 from django_workflow_engine.executor import WorkflowExecutor
-
-
-def create_test_user(
-    first_name="John",
-    last_name="Smith",
-    email="john.smith@test.com",
-    username="john_smith",
-) -> User:
-    user = User.objects.create(
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        username=username,
-    )
-    user.set_password("password")
-    user.save()
-
-    return user
+from django_workflow_engine.models import Flow
+from django_workflow_engine.tests.factories import UserFactory
 
 
 def set_up_flow(settings, workflow):
-    test_user = create_test_user()
+    test_user = UserFactory()
 
     settings.DJANGO_WORKFLOWS = {
         "test_workflow": workflow,

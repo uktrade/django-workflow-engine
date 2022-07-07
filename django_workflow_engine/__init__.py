@@ -15,20 +15,18 @@ from django_workflow_engine.tasks import Task
 # I want to use some built-in tasks
 from django_workflow_engine.tasks import SendEmail, EmailFormTask, TaskError
 """
+# Workflow definition
+from typing import Literal
+
+from .dataclass import Step, Workflow
+
+# Workflow execution
+from .exceptions import WorkflowError, WorkflowNotAuthError
+
 # Workflow url generation
 from .generate_urls import workflow_urls
 
-# Workflow definition
-from .dataclass import Step
-from .dataclass import Workflow
-
-# Workflow execution
-from .exceptions import WorkflowError
-from .exceptions import WorkflowNotAuthError
-
 # Framework built-ins
-from .tasks import SendEmail
-from .tasks import EmailFormTask
-from .tasks import Task, TaskError
+from .tasks import EmailFormTask, SendEmail, Task, TaskError
 
-COMPLETE = "complete"
+COMPLETE: Literal["complete"] = "complete"

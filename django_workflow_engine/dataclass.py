@@ -3,25 +3,28 @@
 Dataclasses that are used to define a custom workflow and its steps.
 """
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import List, Literal, Optional, Type, Union
 
-from .tasks import Task
+from django_workflow_engine.tasks import Task
 
 
 @dataclass
 class Step:
     step_id: str
     task_name: str
-    targets: Optional[list[str]]
+    targets: Union[List[str], Literal["complete"]]
     start: Optional[bool] = None
     task_info: Optional[dict] = None
     description: Optional[str] = None
-    groups: list[str] = field(default_factory=list)
+    groups: List[str] = field(default_factory=list)
     no_log: Optional[bool] = False
     break_flow: Optional[bool] = False
 
     @property
-    def task(self):
+    def task(self) -> Type[Task]:
+        """
+        This property returns the uninstantiated Task class for this step.
+        """
         return Task.tasks[self.task_name]
 
 

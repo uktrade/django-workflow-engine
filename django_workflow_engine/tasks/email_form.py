@@ -25,7 +25,7 @@ class EmailFormTask(Task):
             ","
         )
 
-        return None, form.cleaned_data, True
+        return None, True
 
     def context(self):
         return {"form": self.form(initial=self.task_record.task_info)}

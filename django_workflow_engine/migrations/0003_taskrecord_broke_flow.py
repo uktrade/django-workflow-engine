@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_workflow_engine', '0002_alter_flow_workflow_name'),
+        ("django_workflow_engine", "0002_alter_flow_workflow_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='taskrecord',
-            name='broke_flow',
+            model_name="taskrecord",
+            name="broke_flow",
             field=models.BooleanField(default=False),
         ),
     ]

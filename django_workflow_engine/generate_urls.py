@@ -23,7 +23,7 @@ Alternatively provide own view classes for flow list and flow view:
         ),
     ]
 """
-from django.urls import path, include
+from django.urls import include, path
 
 
 def workflow_urls(

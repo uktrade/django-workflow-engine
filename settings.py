@@ -4,11 +4,12 @@ NB: This is a minimal settings module and is only for django_workflow_engine mig
 creation, do not try to serve a site using this configuration.
 """
 from pathlib import Path
+from typing import List
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'XXX'
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY: str = "XXX"
+DEBUG: bool = True
+ALLOWED_HOSTS: List[str] = []
 
 
 class DummyWorkflow:
@@ -22,24 +23,24 @@ DJANGO_WORKFLOWS = {
 
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django_workflow_engine',
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django_workflow_engine",
 ]
 
-MIDDLEWARE = []
-TEMPLATES = []
+MIDDLEWARE: List[str] = []
+TEMPLATES: List[str] = []
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
