@@ -135,8 +135,8 @@ class WorkflowExecutor:
                 if workflow_step.step_id in targets:
                     self.get_or_create_task_record(step=workflow_step)
 
-        # Break the flow if this task is the first in a loop.
-        if self.flow.workflow.step_first_in_loop(step.step_id):
+        # Break the flow if this task is the last in a loop.
+        if self.flow.workflow.step_last_in_loop(step.step_id):
             break_flow = True
 
         return break_flow

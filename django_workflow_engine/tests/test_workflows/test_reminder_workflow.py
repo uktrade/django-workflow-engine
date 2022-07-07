@@ -19,6 +19,7 @@ def test_reminder_style_workflow(settings):
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
+
     assert TaskRecord.objects.count() == 4
     assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 

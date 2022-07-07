@@ -88,20 +88,11 @@ class Workflow:
 
         return loops
 
-    def step_in_loop(self, step_id: str) -> bool:
+    def step_last_in_loop(self, step_id: str) -> bool:
         loops = self.get_loops()
 
         for loop in loops:
-            if step_id in loop:
-                return True
-
-        return False
-
-    def step_first_in_loop(self, step_id: str) -> bool:
-        loops = self.get_loops()
-
-        for loop in loops:
-            if step_id == loop[0]:
+            if step_id == loop[-1]:
                 return True
 
         return False
