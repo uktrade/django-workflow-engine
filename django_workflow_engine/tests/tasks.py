@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from django_workflow_engine.tasks.task import Task
 
 User = get_user_model()

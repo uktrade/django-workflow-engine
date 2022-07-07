@@ -1,6 +1,7 @@
 import logging
 
 import pytest
+
 from django_workflow_engine.models import TaskRecord
 from django_workflow_engine.tests.factories import UserFactory
 from django_workflow_engine.tests.utils import set_up_flow
