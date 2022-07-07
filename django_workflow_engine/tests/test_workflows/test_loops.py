@@ -1,5 +1,4 @@
 import pytest
-
 from django_workflow_engine.dataclass import Workflow
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.workflows import (
@@ -14,7 +13,7 @@ from django_workflow_engine.tests.workflows import (
 @pytest.mark.django_db
 def test_linear_workflow(settings):
     """
-    All steps in a linear workflow should return that they are NOT in a loop.
+    There are no loops in the linear workflow.
     """
     flow, executor, test_user = set_up_flow(
         settings,
@@ -30,7 +29,7 @@ def test_linear_workflow(settings):
 @pytest.mark.django_db
 def test_split_workflow(settings):
     """
-    All steps in the split workflow should return that they are NOT in a loop.
+    There are no loops in the split workflow.
     """
     flow, executor, test_user = set_up_flow(
         settings,
@@ -46,7 +45,7 @@ def test_split_workflow(settings):
 @pytest.mark.django_db
 def test_split_and_join_workflow(settings):
     """
-    All steps in the split and join workflow should return that they are NOT in a loop.
+    There are no loops in the split and join workflow.
     """
     flow, executor, test_user = set_up_flow(
         settings,
@@ -62,8 +61,7 @@ def test_split_and_join_workflow(settings):
 @pytest.mark.django_db
 def test_reminder_workflow(settings):
     """
-    Reminder workflow contains a loop, so some of the steps should return
-    that they are in a loop.
+    There is 1 loop in the reminder workflow.
     """
     flow, executor, test_user = set_up_flow(
         settings,
@@ -81,8 +79,7 @@ def test_reminder_workflow(settings):
 @pytest.mark.django_db
 def test_complex_loops_workflow(settings):
     """
-    The complex loops workflow contains many loops, so some of the steps should return
-    that they are in a loop.
+    There are 2 loops in the complex loops workflow.
     """
     flow, executor, test_user = set_up_flow(
         settings,
