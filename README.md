@@ -54,12 +54,12 @@ urlpatterns = [
 
 ## Building your first workflow
 
-Create a `workflow.py` in your project and add your uniquely named workflows.
+Create a `workflows.py` in your project and add your uniquely named workflows.
 
 ```python
 from django_workflow_engine import Step, Workflow
 
-Onboard_Contractor = Workflow(
+onboard_contractor = Workflow(
     name="onboard_contractor",
     steps=[
         Step(...),
@@ -68,7 +68,7 @@ Onboard_Contractor = Workflow(
     ],
 )
 
-Onboard_Perm = Workflow(
+onboard_perm = Workflow(
     name="onboard_perm",
     steps=[
         ...
@@ -79,10 +79,10 @@ Onboard_Perm = Workflow(
 Add you workflows to your Django settings as follows:
 
 ```python
-DJANGO_WORKFLOWS = [
-    "workflows.onboard_contractor.OnboardContractor",
-    "workflows.onboard_perm.OnboardPerm",
-]
+DJANGO_WORKFLOWS = {
+    "onboard_contractor": "your_app.workflows.onboard_contractor",
+    "onboard_perm": "your_app.workflows.onboard_perm",
+}
 ```
 
 Each entry needs to be a valid module path where the final component is the 
