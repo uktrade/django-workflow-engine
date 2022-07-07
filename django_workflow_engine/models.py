@@ -9,7 +9,7 @@ from django_workflow_engine.dataclass import Workflow
 from django_workflow_engine.exceptions import WorkflowImproperlyConfigured
 from django_workflow_engine.utils import lookup_workflow
 
-if not settings.DJANGO_WORKFLOWS:
+if not hasattr(settings, "DJANGO_WORKFLOWS"):
     raise WorkflowImproperlyConfigured("Add DJANGO_WORKFLOWS to your settings")
 
 
