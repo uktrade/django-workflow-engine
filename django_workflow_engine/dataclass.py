@@ -3,6 +3,7 @@
 Dataclasses that are used to define a custom workflow and its steps.
 """
 from dataclasses import dataclass, field
+from itertools import dropwhile
 from typing import List, Literal, Optional, Type, Union
 
 from django_workflow_engine.tasks import Task
@@ -54,8 +55,6 @@ class Workflow:
                     linked_chains.append(chain)
 
             loop_detected = False
-
-            from itertools import dropwhile
 
             for linked_chain in linked_chains:
                 new_chain = linked_chain.copy()
