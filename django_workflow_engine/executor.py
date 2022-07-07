@@ -43,17 +43,18 @@ class WorkflowExecutor:
         self.flow.save(update_fields=["running"])
 
         # Progress the workflow
-        break_flow = self.execute_steps(user=user)
+        self.execute_steps(user=user)
 
-        # If the flow hasn't been broken, then we are done.
-        if not break_flow:
+        # If the flow has no remaining steps, then we are done.
+        remaining_steps = self.get_current_steps()
+        if not remaining_steps:
             self.flow.finished = timezone.now()
 
         # Mark the flow as not running, so that it can be picked up again.
         self.flow.running = False
         self.flow.save(update_fields=["running"])
 
-    def execute_steps(self, user: User) -> bool:
+    def execute_steps(self, user: User):
         """
         Execute any steps that have not been complete.
 
@@ -78,12 +79,10 @@ class WorkflowExecutor:
         # If we have broken the flow, then we are done, any remaining tasks will
         # be picked up next time.
         if break_flow:
-            return break_flow
+            return None
 
         # Call this function again to execute the next steps.
-        break_flow = self.execute_steps(user=user)
-
-        return break_flow
+        self.execute_steps(user=user)
 
     def execute_step(
         self,
