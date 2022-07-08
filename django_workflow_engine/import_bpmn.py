@@ -3,20 +3,28 @@ import bpmn_python.bpmn_diagram_rep as diagram
 
 
 def output_step(step:Step):
+    # generate the Python code for a step inside the workflow
     start_value = ""
     if step.start:
         start_value = """
         start=True,"""
-    targets = ""
     if step.targets:
         targets = "targets=["
         for target in step.targets:
             targets = f'{targets}"{target}", '
         targets = f"{targets}], "
+    else:
+        targets = "targets=[COMPLETE, ]"
+
+    condition = ""
+    if step.condition == "True":
+        condition = """
+        condition=True,"""
+
     output = f'''Step(
         label="{step.label}",
         step_id="{step.step_id}",
-        task_name="{step.step_id}_task",{start_value}
+        task_name="{step.step_id}_task",{start_value}{condition}
         {targets}
     ),
     '''
@@ -24,12 +32,14 @@ def output_step(step:Step):
 
 
 def output_workflow(workflow:Workflow, file):
-    file.write("""from django_workflow_engine import Step, Workflow
+    # Generate the Python code for the workflow
+    # Add the relevant import
+    file.write("""from django_workflow_engine import COMPLETE, Step, Workflow
     
     """)
-
+    # Generate the workflow
     file.write(f'''    
-test_workflow = Workflow(
+bpmn_imported_workflow = Workflow(
         name="{workflow.name}",
         steps=[
     ''')
@@ -43,29 +53,27 @@ test_workflow = Workflow(
 
 
 def translate_node_to_step(node):
-    # import pdb;
-    # pdb.set_trace()
-
+    # TODO add the format of the node
     step = Step(node['id'], node['node_name'], node['node_name'], node["outgoing"])
-    # step.step_id = node['id']
     step.start = node['type'] == 'startEvent'
-    # step.label = node['node_name']
-    # step.targets = node["outgoing"]
+    if node['type'] == 'exclusiveGateway':
+        step.condition = True
     return step
+
 
 def make_name_from_label(label):
     return label.replace(" ","_").lower()
 
-def import_BPMN(xml_file_path, work_flow_name, output_file_path):
+
+def import_BPMN(xml_file_path,  output_file_path):
+    # TODO add error handling
     bpmn_graph = diagram.BpmnDiagramGraph()
     bpmn_graph.load_diagram_from_xml_file(xml_file_path)
+    work_flow_name = bpmn_graph.diagram_attributes['name']
     step_list = []
     step_translation = {}
-    # for node in bpmn_graph.diagram_graph._node:
-    nodes = bpmn_graph.get_nodes()
-    # import pdb;
-    # pdb.set_trace()
-    for node in nodes:
+
+    for node in bpmn_graph.get_nodes():
         workflow_node = translate_node_to_step(node[1])
         step_list.append(workflow_node)
         name_from_label = make_name_from_label(node[1]['node_name'])
@@ -73,12 +81,10 @@ def import_BPMN(xml_file_path, work_flow_name, output_file_path):
         for incoming_node in node[1]['incoming']:
             step_translation[incoming_node] = name_from_label
 
-    #     convert the id in the workflow nodes to human names
+    #  convert the id in the workflow nodes to human names
     for step in step_list:
         target_list = []
         step.step_id = step_translation[step.step_id]
-        # import pdb;
-        # pdb.set_trace()
         if step.targets:
             for target in step.targets:
                 target_list.append(step_translation[target])
@@ -88,4 +94,3 @@ def import_BPMN(xml_file_path, work_flow_name, output_file_path):
     output_file = open(output_file_path, "w")
     output_workflow(workflow, output_file)
     output_file.close()
-
