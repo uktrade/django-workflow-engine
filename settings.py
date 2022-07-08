@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django_workflow_engine',
-    'import_bpmn'
 ]
 
 MIDDLEWARE = []
