@@ -1,0 +1,12 @@
+{% extends 'workflow/base.html' %}
+
+{% block content %}
+<h1>Example Project - Django Workflow Engine</h1>
+
+<h2>Select user</h2>
+<form action="{% url 'workflow:select-user' %}" method="post">
+    {% csrf_token %}
+    {{ select_user_form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+{% endblock %}
