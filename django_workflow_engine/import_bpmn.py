@@ -17,7 +17,7 @@ def output_step(step:Step):
         targets = "targets=[COMPLETE, ]"
 
     condition = ""
-    if step.condition == "True":
+    if step.condition:
         condition = """
         condition=True,"""
 

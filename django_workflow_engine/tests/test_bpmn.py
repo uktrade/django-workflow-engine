@@ -1,6 +1,5 @@
 import pytest
 from django_workflow_engine import COMPLETE, Step, Task, Workflow
-from django_workflow_engine.tests.utils import set_up_flow
 
 from django_workflow_engine.export import WorkflowExporter
 
@@ -342,6 +341,7 @@ def test_bpmn_xml_export(settings):
             ),
         ],
     )
+
 
     exporter = WorkflowExporter(test_workflow)
     exporter.export_bpmn()
