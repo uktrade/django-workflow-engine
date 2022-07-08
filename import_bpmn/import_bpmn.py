@@ -1,7 +1,5 @@
-import os
-
-import bpmn_python.bpmn_diagram_rep as diagram
 from django_workflow_engine import Step, Workflow
+import bpmn_python.bpmn_diagram_rep as diagram
 
 
 def output_step(step:Step):
