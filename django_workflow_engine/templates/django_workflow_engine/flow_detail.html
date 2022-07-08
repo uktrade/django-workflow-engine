@@ -1,4 +1,4 @@
-<h1>{{ object.get_workflow_name_display }} - {{ object.flow_name }}</h1>
+<h1>{{ object.workflow_name }} - {{ object.flow_name }}</h1>
 <dl>
   <div>
     <dt>
@@ -37,8 +37,10 @@
   {% endif %}
 </dl>
 
-{% if object.current_task_record and not task.auto %}
-  <a href="{% url 'flow-continue' object.pk %}">Continue</a>
-{% endif %}
+{% with next_task=object.current_task_record %}
+    {% if next_task and not next_task.auto %}
+        <a href="{% url 'flow-continue' object.pk %}">Continue</a>
+    {% endif %}
+{% endwith %}
 
 {% include 'django_workflow_engine/flow_diagram.html' %}

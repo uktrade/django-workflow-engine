@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, TypedDict, cast
 
 from django import forms
 from django.conf import settings
@@ -15,6 +15,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.list import ListView
 
+from django_workflow_engine import COMPLETE
 from django_workflow_engine.dataclass import Step
 from django_workflow_engine.exceptions import WorkflowNotAuthError
 from django_workflow_engine.executor import WorkflowExecutor
@@ -131,7 +132,7 @@ class FlowContinueView(TemplateView):
                 self.authorised_next_steps.append(next_step)
 
     def dispatch(
-        self, request: HttpRequest, *args: Any, **kwargs: Any
+            self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
         if not self.authorised_next_steps:
             return redirect(self.get_cannot_view_step_url())
@@ -178,7 +179,7 @@ class FlowContinueView(TemplateView):
 
 class FlowDiagramView(View):
     def get(
-        self, request: HttpRequest, pk: int, *args: Any, **kwargs: Any
+            self, request: HttpRequest, pk: int, *args: Any, **kwargs: Any
     ) -> HttpResponse:
         try:
             flow: Flow = Flow.objects.get(pk=pk)
@@ -212,7 +213,7 @@ class EdgeData(TypedDict):
     data: Edge
 
 
-def workflow_to_cytoscape_elements(flow) -> List[Union[NodeData, EdgeData]]:
+def workflow_to_cytoscape_elements(flow):
     nodes: List[NodeData] = [
         {
             "data": step_to_node(flow, step),
@@ -229,11 +230,12 @@ def workflow_to_cytoscape_elements(flow) -> List[Union[NodeData, EdgeData]]:
             }
         }
         for step in flow.workflow.steps
+        if step.targets and step.targets != COMPLETE
         for target in step.targets
         if target
     ]
 
-    return [*nodes, *edges]
+    return {"nodes": nodes, "edges": edges}
 
 
 def step_to_node(flow: Flow, step: Step) -> Node:
@@ -256,7 +258,7 @@ def step_to_node(flow: Flow, step: Step) -> Node:
         "label": label,
         "start": bool(step.start),
         "end": end,
-        "decision": len(targets) > 1,
+        "decision": len(targets) > 1 if targets else False,
         "done": done,
         "current": current,
     }
