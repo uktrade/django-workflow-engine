@@ -130,4 +130,5 @@ DJANGO_WORKFLOWS = {
     "simple_workflow": "workflow.workflows.simple_workflow",
     "split_and_join_workflow": "workflow.workflows.split_and_join_workflow",
     "combine_workflow": "workflow.workflows.combine_workflow",
+    "infinite_loop_workflow": "workflow.workflows.infinite_loop_workflow",
 }

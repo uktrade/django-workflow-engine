@@ -139,3 +139,45 @@ combine_workflow = Workflow(
         ),
     ],
 )
+
+infinite_loop_workflow = Workflow(
+    name="infinite_loop_workflow",
+    steps=[
+        Step(
+            step_id="wake_up",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["eat"],
+            task_info={
+                "message": "you're awake"
+            }
+        ),
+        Step(
+            step_id="eat",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["party"],
+            task_info={
+                "message": "you're eating"
+            }
+        ),
+        Step(
+            step_id="party",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["party"],
+            task_info={
+                "message": "you're partying"
+            }
+        ),
+        Step(
+            step_id="sleep",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["wake_up"],
+            task_info={
+                "message": "you're sleep"
+            }
+        ),
+    ],
+)

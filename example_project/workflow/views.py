@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.contrib.auth import get_user_model, login, logout
 from django.core.exceptions import ValidationError
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
+from django_workflow_engine.views import FlowListView
 from .forms import SelectUserForm
-
 
 User = get_user_model()
 
@@ -32,3 +32,7 @@ def select_user(request):
         logout(request)
 
     return redirect(reverse("flow-list"))
+
+
+class CustomListView(FlowListView):
+    template_name = "workflow/list_flows.html"
