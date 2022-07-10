@@ -31,4 +31,4 @@ def select_user(request):
     else:
         logout(request)
 
-    return redirect(reverse("workflow:home"))
+    return redirect(reverse("flow-list"))

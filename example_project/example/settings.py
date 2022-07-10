@@ -129,4 +129,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DJANGO_WORKFLOWS = {
     "simple_workflow": "workflow.workflows.simple_workflow",
     "split_and_join_workflow": "workflow.workflows.split_and_join_workflow",
+    "combine_workflow": "workflow.workflows.combine_workflow",
 }

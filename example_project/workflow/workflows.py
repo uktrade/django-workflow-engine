@@ -88,3 +88,54 @@ split_and_join_workflow = Workflow(
         ),
     ],
 )
+
+combine_workflow = Workflow(
+    name="combine_workflow",
+    steps=[
+        Step(
+            step_id="canterbury",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["rochester"],
+            task_info={
+                "message": "you're in Canterbury"
+            }
+        ),
+        Step(
+            step_id="rochester",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["london"],
+            task_info={
+                "message": "you're in Rochester"
+            }
+        ),
+        Step(
+            step_id="colchester",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["chelmsford"],
+            task_info={
+                "message": "you're in Colchester"
+            }
+        ),
+        Step(
+            step_id="chelmsford",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=["london"],
+            task_info={
+                "message": "you're in Chelmsford"
+            }
+        ),
+        Step(
+            step_id="london",
+            task_name=LogMessageTask.task_name,
+            start=True,
+            targets=COMPLETE,
+            task_info={
+                "message": "you're finished in London"
+            }
+        ),
+    ],
+)
