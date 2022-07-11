@@ -52,7 +52,7 @@ class WorkflowExecutor:
 
         # Mark the flow as not running, so that it can be picked up again.
         self.flow.running = False
-        self.flow.save(update_fields=["finished", "running"])
+        self.flow.save(update_fields=["running", "finished"])
 
     def execute_steps(self, user: User):
         """

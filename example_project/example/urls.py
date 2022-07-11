@@ -14,12 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from django_workflow_engine import workflow_urls
+from django.urls import include, path
 
+from django_workflow_engine import workflow_urls
+from example_project.workflow.views import CustomListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('workflow/', workflow_urls()),
+    path('workflow/', workflow_urls(list_view=CustomListView)),
     path('', include('workflow.urls'))
 ]
