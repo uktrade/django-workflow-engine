@@ -27,22 +27,6 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
-name = "django-workflow-engine"
-version = "0.0.20"
-description = "Lightweight, reusable workflow engine for Django applications"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-develop = true
-
-[package.dependencies]
-django = ">=3.2.8"
-
-[package.source]
-type = "directory"
-url = ".."
-
-[[package]]
 name = "sqlparse"
 version = "0.4.2"
 description = "A non-validating SQL parser."
@@ -61,7 +45,7 @@ python-versions = ">=2"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "8d031f27f4a5b970c9b7ed771526196584b396af93ff551b80ae14e020d21575"
+content-hash = "d71da624e3d831ba1716695cb91e70830138f274b4d2dc3f7e0ede48c153a8db"
 
 [metadata.files]
 asgiref = [
@@ -72,7 +56,6 @@ django = [
     {file = "Django-4.0.6-py3-none-any.whl", hash = "sha256:ca54ebedfcbc60d191391efbf02ba68fb52165b8bf6ccd6fe71f098cac1fe59e"},
     {file = "Django-4.0.6.tar.gz", hash = "sha256:a67a793ff6827fd373555537dca0da293a63a316fe34cb7f367f898ccca3c3ae"},
 ]
-django-workflow-engine = []
 sqlparse = [
     {file = "sqlparse-0.4.2-py3-none-any.whl", hash = "sha256:48719e356bb8b42991bdbb1e8b83223757b93789c00910a616a071910ca4a64d"},
     {file = "sqlparse-0.4.2.tar.gz", hash = "sha256:0c00730c74263a94e5a9919ade150dfc3b19c574389985446148402998287dae"},
