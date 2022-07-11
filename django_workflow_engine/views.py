@@ -230,7 +230,7 @@ def workflow_to_cytoscape_elements(flow):
             }
         }
         for step in flow.workflow.steps
-        if step.targets and step.targets != COMPLETE
+        if step.targets != COMPLETE
         for target in step.targets
         if target
     ]
@@ -258,7 +258,7 @@ def step_to_node(flow: Flow, step: Step) -> Node:
         "label": label,
         "start": bool(step.start),
         "end": end,
-        "decision": len(targets) > 1 if targets else False,
+        "decision": len(targets) > 1,
         "done": done,
         "current": current,
     }
