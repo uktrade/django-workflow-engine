@@ -9,7 +9,7 @@
 </style>
 
 <div id="flow-diagram"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.0/cytoscape.min.js" integrity="sha512-aCX966x/zKpS6vzTVuzXEchbyY6UJHguwHJ3X8XxJJQAnxqSCwvHye1NolmDkUwBh7u5p80lNbCfTdoPDb/O5g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.0/cytoscape.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript">
    fetch("{% url 'flow-diagram' object.pk %}")
     .then((response) => response.json())
