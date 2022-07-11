@@ -1,8 +1,6 @@
 """django_workflow_engine utils."""
-import importlib
-import sys
-
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 from django_workflow_engine.dataclass import Workflow
 
@@ -61,12 +59,7 @@ def load_workflow(workflow_key) -> Workflow:
         return class_or_str
 
     try:
-        if "." in class_or_str:
-            module_path, cls = class_or_str.rsplit(".", 1)
-            module = importlib.import_module(module_path)
-            return getattr(module, cls)
-        else:
-            return getattr(sys.modules[__name__], class_or_str)
+        return import_string(class_or_str)
     except (ModuleNotFoundError, ImportError, AttributeError) as e:
         raise WorkflowImproperlyConfigured(
             f"Failed to load workflow from '{class_or_str}': {e}"
