@@ -115,15 +115,15 @@ class WorkflowExecutor:
         # Execute the task
         targets, task_done = task.execute(task_record.task_info)
 
-        # Default tasks will have None target
-        # So we want step targets to be used
-        if not targets:
-            targets = step.targets
-
         task_record.done = task_done
         task_record.executed_by = user
         task_record.executed_at = timezone.now()
         task_record.save()
+
+        # If the task didn't return targets, we only use step targets if
+        # the task is done.
+        if not targets and task_done:
+            targets = step.targets
 
         # Create objects for the next tasks, generated after the current.
         if targets and targets != COMPLETE:
@@ -135,8 +135,8 @@ class WorkflowExecutor:
                 if workflow_step.step_id in targets:
                     self.get_or_create_task_record(step=workflow_step)
 
-        # Break the flow if this task is the last in a loop.
-        if self.flow.workflow.step_last_in_loop(step.step_id):
+        # Break the flow if this task is the last in a loop or if the task isn't done.
+        if self.flow.workflow.step_last_in_loop(step.step_id) or not task_done:
             break_flow = True
 
         return break_flow

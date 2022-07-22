@@ -1,6 +1,9 @@
 from django_workflow_engine import COMPLETE
 from django_workflow_engine.dataclass import Step, Workflow
-from django_workflow_engine.tests.tasks import BasicTask
+from django_workflow_engine.tasks.previous_tasks_complete import (
+    PreviousTasksCompleteTask,
+)
+from django_workflow_engine.tests.tasks import BasicTask, PauseTask
 
 """
 Test workflow definitions
@@ -86,6 +89,55 @@ split_and_join_workflow = Workflow(
         ),
         Step(
             step_id="task_c",
+            task_name=BasicTask.task_name,
+            targets=COMPLETE,
+        ),
+    ],
+)
+
+previous_tasks_complete_workflow = Workflow(
+    name="previous_tasks_complete",
+    steps=[
+        Step(
+            step_id="start",
+            task_name=BasicTask.task_name,
+            start=True,
+            targets=["task_a", "task_b"],
+        ),
+        Step(
+            step_id="task_a",
+            task_name=BasicTask.task_name,
+            targets=["task_c"],
+        ),
+        Step(
+            step_id="task_b",
+            task_name=BasicTask.task_name,
+            targets=["task_c"],
+        ),
+        Step(
+            step_id="task_c",
+            task_name=PreviousTasksCompleteTask.task_name,
+            targets=COMPLETE,
+        ),
+    ],
+)
+
+pause_task_workflow = Workflow(
+    name="pause_task_workflow",
+    steps=[
+        Step(
+            step_id="start",
+            task_name=BasicTask.task_name,
+            start=True,
+            targets=["pause"],
+        ),
+        Step(
+            step_id="pause",
+            task_name=PauseTask.task_name,
+            targets=["end"],
+        ),
+        Step(
+            step_id="end",
             task_name=BasicTask.task_name,
             targets=COMPLETE,
         ),
