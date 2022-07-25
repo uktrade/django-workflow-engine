@@ -1,5 +1,4 @@
 import pytest
-
 from django_workflow_engine.models import TaskRecord
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.workflows import split_workflow
@@ -23,5 +22,5 @@ def test_parallel_path_no_join_workflow(settings):
         "finish_task_b",
     ]
 
-    for i, task_record in enumerate(TaskRecord.objects.all()):
-        assert task_record.step_id == correct_task_order[i]
+    task_order = [task_record.step_id for task_record in TaskRecord.objects.all()]
+    assert task_order == correct_task_order

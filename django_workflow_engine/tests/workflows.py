@@ -122,8 +122,56 @@ previous_tasks_complete_workflow = Workflow(
     ],
 )
 
+previous_tasks_complete_failure_workflow = Workflow(
+    name="previous_tasks_complete",
+    steps=[
+        Step(
+            step_id="start",
+            task_name=BasicTask.task_name,
+            start=True,
+            targets=["task_a", "task_b"],
+        ),
+        Step(
+            step_id="task_a",
+            task_name=BasicTask.task_name,
+            targets=["task_c"],
+        ),
+        Step(
+            step_id="task_b",
+            task_name=PauseTask.task_name,
+            targets=["task_c"],
+        ),
+        Step(
+            step_id="task_c",
+            task_name=PreviousTasksCompleteTask.task_name,
+            targets=COMPLETE,
+        ),
+    ],
+)
+
 pause_task_workflow = Workflow(
     name="pause_task_workflow",
+    steps=[
+        Step(
+            step_id="start",
+            task_name=BasicTask.task_name,
+            start=True,
+            targets=["pause"],
+        ),
+        Step(
+            step_id="pause",
+            task_name=PauseTask.task_name,
+            targets=["end"],
+        ),
+        Step(
+            step_id="end",
+            task_name=BasicTask.task_name,
+            targets=COMPLETE,
+        ),
+    ],
+)
+self_ref_pause_task_workflow = Workflow(
+    name="self_ref_pause_task_workflow",
     steps=[
         Step(
             step_id="start",

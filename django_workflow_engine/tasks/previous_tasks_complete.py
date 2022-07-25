@@ -26,18 +26,13 @@ class PreviousTasksCompleteTask(Task):
         all_previous_steps_complete: bool = True
 
         for previous_step in previous_steps:
-            try:
-                previous_step_task: TaskRecord = flow.tasks.get(
-                    step_id=previous_step.step_id
-                )
-            except TaskRecord.DoesNotExist:
+            previous_step_task_completed: bool = flow.tasks.filter(
+                step_id=previous_step.step_id,
+                done=True,
+            ).exists()
+
+            if not previous_step_task_completed:
                 all_previous_steps_complete = False
                 break
 
-            if not previous_step_task.done:
-                all_previous_steps_complete = False
-                break
-
-        if all_previous_steps_complete:
-            return None, True
-        return None, False
+        return [], all_previous_steps_complete

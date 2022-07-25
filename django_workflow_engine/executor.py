@@ -42,8 +42,13 @@ class WorkflowExecutor:
         self.flow.running = True
         self.flow.save(update_fields=["running"])
 
-        # Progress the workflow
-        self.execute_steps(user=user)
+        try:
+            # Progress the workflow
+            self.execute_steps(user=user)
+        except Exception as e:
+            self.flow.running = False
+            self.flow.save(update_fields=["running"])
+            raise e
 
         # If the flow has no remaining steps, then we are done.
         remaining_steps = self.get_current_steps()
@@ -120,10 +125,17 @@ class WorkflowExecutor:
         task_record.executed_at = timezone.now()
         task_record.save()
 
+        if targets is None:
+            targets = []
+
         # If the task didn't return targets, we only use step targets if
         # the task is done.
-        if not targets and task_done:
-            targets = step.targets
+        if not targets:
+            if task_done:
+                targets = step.targets
+            else:
+                # If the task is not done, then re-add the step to the targets.
+                targets.append(step.step_id)
 
         # Create objects for the next tasks, generated after the current.
         if targets and targets != COMPLETE:
@@ -135,8 +147,12 @@ class WorkflowExecutor:
                 if workflow_step.step_id in targets:
                     self.get_or_create_task_record(step=workflow_step)
 
-        # Break the flow if this task is the last in a loop or if the task isn't done.
-        if self.flow.workflow.step_last_in_loop(step.step_id) or not task_done:
+        # Break the flow if this task is the last in a loop or if the task isn't done or if this step is in the target list.
+        if (
+            self.flow.workflow.step_last_in_loop(step.step_id)
+            or not task_done
+            or step.step_id in targets
+        ):
             break_flow = True
 
         return break_flow

@@ -1,10 +1,16 @@
+from unittest import mock
+
 import pytest
+from django_workflow_engine.tests.tasks import BasicTask
 from django_workflow_engine.tests.utils import set_up_flow
-from django_workflow_engine.tests.workflows import previous_tasks_complete_workflow
+from django_workflow_engine.tests.workflows import (
+    previous_tasks_complete_failure_workflow,
+    previous_tasks_complete_workflow,
+)
 
 
 @pytest.mark.django_db(transaction=True)
-def test_previous_tasks_complete_workflow(settings):
+def test_previous_tasks_complete_task(settings):
     flow, executor, test_user = set_up_flow(
         settings,
         previous_tasks_complete_workflow,
@@ -17,7 +23,7 @@ def test_previous_tasks_complete_workflow(settings):
 
     executor.execute_step(user=test_user, step=end)
 
-    assert flow.tasks.count() == 1
+    assert flow.tasks.count() == 2
     end_task = flow.tasks.filter(step_id=end.step_id).last()
     assert not end_task.done
 
@@ -27,7 +33,7 @@ def test_previous_tasks_complete_workflow(settings):
 
     executor.execute_step(user=test_user, step=end)
 
-    assert flow.tasks.count() == 3
+    assert flow.tasks.count() == 4
     end_task = flow.tasks.filter(step_id=end.step_id).last()
     assert not end_task.done
 
@@ -37,7 +43,7 @@ def test_previous_tasks_complete_workflow(settings):
 
     executor.execute_step(user=test_user, step=end)
 
-    assert flow.tasks.count() == 5
+    assert flow.tasks.count() == 6
     end_task = flow.tasks.filter(step_id=end.step_id).last()
     assert not end_task.done
 
@@ -49,4 +55,44 @@ def test_previous_tasks_complete_workflow(settings):
 
     assert flow.tasks.count() == 7
     end_task = flow.tasks.filter(step_id=end.step_id).last()
+    assert end_task.done
+
+
+@pytest.mark.django_db(transaction=True)
+def test_previous_tasks_complete_workflow(settings):
+    flow, executor, test_user = set_up_flow(
+        settings,
+        previous_tasks_complete_workflow,
+    )
+
+    executor.run_flow(user=test_user)
+
+    assert flow.tasks.count() == 4
+    end_task = flow.tasks.filter(step_id="task_c").last()
+    assert end_task.done
+
+
+@mock.patch(
+    "django_workflow_engine.tests.tasks.PauseTask.execute", return_value=([], False)
+)
+@pytest.mark.django_db(transaction=True)
+def test_previous_tasks_complete_failure_workflow(mock_execute, settings):
+    flow, executor, test_user = set_up_flow(
+        settings,
+        previous_tasks_complete_failure_workflow,
+    )
+
+    executor.run_flow(user=test_user)
+
+    assert flow.tasks.count() == 5
+    end_task = flow.tasks.filter(step_id="task_c").last()
+    assert not end_task.done
+
+    mock_execute.return_value = ([], True)
+
+    while not flow.tasks.filter(step_id="task_c", done=True).exists():
+        executor.run_flow(user=test_user)
+
+    assert flow.tasks.count() == 6
+    end_task = flow.tasks.filter(step_id="task_c").last()
     assert end_task.done

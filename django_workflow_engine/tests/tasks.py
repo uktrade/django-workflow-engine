@@ -15,7 +15,7 @@ class BasicTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return None, True
+        return [], True
 
 
 class PauseTask(Task):
@@ -23,7 +23,15 @@ class PauseTask(Task):
     auto = True
 
     def execute(self, task_info):
-        raise Exception("Workflow paused")
+        return [], False
+
+
+class SelfReferencingPauseTask(Task):
+    task_name = "self_ref_pause_task"
+    auto = True
+
+    def execute(self, task_info):
+        return ["self_ref_pause_task"], False
 
 
 class WasUserCreatedTask(Task):
