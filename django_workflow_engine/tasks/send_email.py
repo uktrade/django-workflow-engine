@@ -26,4 +26,4 @@ class SendEmail(Task):
             fail_silently=False,
         )
 
-        return None, True
+        return [], True

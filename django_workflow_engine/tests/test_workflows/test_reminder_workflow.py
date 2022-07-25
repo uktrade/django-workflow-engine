@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-
 from django_workflow_engine.models import TaskRecord
 from django_workflow_engine.tests.factories import UserFactory
 from django_workflow_engine.tests.utils import set_up_flow
@@ -20,18 +19,19 @@ def test_reminder_style_workflow(settings):
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
+    assert TaskRecord.objects.count() == 3
+    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 
+    executor.run_flow(user=test_user)
+
+    assert not flow.is_complete
     assert TaskRecord.objects.count() == 4
     assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 
     executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 6
-    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
-
-    executor.run_flow(user=test_user)
-
-    assert TaskRecord.objects.count() == 8
+    assert not flow.is_complete
+    assert TaskRecord.objects.count() == 5
     assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
 
     correct_task_order = [
@@ -40,24 +40,22 @@ def test_reminder_style_workflow(settings):
         "remind_creator",
         "was_user_created",
         "remind_creator",
-        "was_user_created",
-        "remind_creator",
-        "was_user_created",
     ]
 
-    for i, task_record in enumerate(TaskRecord.objects.all()):
-        assert task_record.step_id == correct_task_order[i]
+    task_order = [task_record.step_id for task_record in TaskRecord.objects.all()]
+    assert task_order == correct_task_order
 
     # Create "Sam" user
     UserFactory(first_name="Sam")
 
-    executor.run_flow(user=test_user)
+    # Execute the flow until it completes
+    while not flow.is_complete:
+        executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 9
+    assert TaskRecord.objects.count() == 7
 
+    correct_task_order.append("was_user_created")
     correct_task_order.append("notify_creator")
 
-    for i, task_record in enumerate(TaskRecord.objects.all()):
-        assert task_record.step_id == correct_task_order[i]
-
-    assert flow.is_complete
+    task_order = [task_record.step_id for task_record in TaskRecord.objects.all()]
+    assert task_order == correct_task_order

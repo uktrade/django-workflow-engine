@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-
 from django_workflow_engine.tasks.task import Task
 
 User = get_user_model()
@@ -16,7 +15,23 @@ class BasicTask(Task):
     auto = True
 
     def execute(self, task_info):
-        return None, True
+        return [], True
+
+
+class PauseTask(Task):
+    task_name = "pause_task"
+    auto = True
+
+    def execute(self, task_info):
+        return [], False
+
+
+class SelfReferencingPauseTask(Task):
+    task_name = "self_ref_pause_task"
+    auto = True
+
+    def execute(self, task_info):
+        return ["self_ref_pause_task"], False
 
 
 class WasUserCreatedTask(Task):

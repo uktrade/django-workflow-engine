@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, TypedDict, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, cast
 
 from django import forms
 from django.conf import settings
@@ -132,7 +132,7 @@ class FlowContinueView(TemplateView):
                 self.authorised_next_steps.append(next_step)
 
     def dispatch(
-            self, request: HttpRequest, *args: Any, **kwargs: Any
+        self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
         if not self.authorised_next_steps:
             return redirect(self.get_cannot_view_step_url())
@@ -179,7 +179,7 @@ class FlowContinueView(TemplateView):
 
 class FlowDiagramView(View):
     def get(
-            self, request: HttpRequest, pk: int, *args: Any, **kwargs: Any
+        self, request: HttpRequest, pk: int, *args: Any, **kwargs: Any
     ) -> HttpResponse:
         try:
             flow: Flow = Flow.objects.get(pk=pk)
