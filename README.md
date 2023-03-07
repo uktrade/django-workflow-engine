@@ -1,6 +1,6 @@
 # django-workflow-engine
-`django-workflow` is a lightweight and reusable workflow engine for 
-Django applications. It enables you to better organise the business logic for 
+`django-workflow` is a lightweight and reusable workflow engine for
+Django applications. It enables you to better organise the business logic for
 collaborating users.
 
 ## Installation
@@ -17,9 +17,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add the built-in `django-workflow-engine` view urls to your project's `urls.
-py` as 
-follows:
+Add the built-in `django-workflow-engine` view urls to your project's `urls.py` as follows:
 
 
 ```python
@@ -43,7 +41,7 @@ provide your own view classes for flow list and flow view:
 
 ```python
 urlpatterns = [
-        path("workflow/", 
+        path("workflow/",
              workflow_urls(
                  list_view=MyFlowListView,
                  view=MyFlowView,
@@ -85,8 +83,8 @@ DJANGO_WORKFLOWS = {
 }
 ```
 
-Each entry needs to be a valid module path where the final component is the 
-name of your workflow class.  
+Each entry needs to be a valid module path where the final component is the
+name of your workflow class.
 
 Finally, run the `django-workflow-engine` migrations:
 
@@ -94,10 +92,41 @@ Finally, run the `django-workflow-engine` migrations:
 $ ./manage.py migrate
 ```
 
-## Publishing
+## Pushing to PyPI
 
-1. `python setup.py sdist`
-2. `twine upload dist/*`
+- [PyPI Package](https://pypi.org/project/django-workflow-engine/)
+- [Test PyPI Package](https://test.pypi.org/project/django-workflow-engine/)
+
+Running `make build-package` will build the package into the `dist/` directory
+Running `make push-pypi-test` will push the built package to Test PyPI
+Running `make push-pypi` will push the built package to PyPI
+
+### Setting up poetry for pushing to PyPI
+
+First you will need to add the test pypy repository to your poetry config:
+
+```
+poetry config repositories.test-pypi https://test.pypi.org/legacy/
+```
+
+Then go to https://test.pypi.org/manage/account/token/ and generate a token.
+
+Then add it to your poetry config:
+
+```
+poetry config pypi-token.test-pypi XXXXXXXX
+```
+
+Then you also need to go to https://pypi.org/manage/account/token/ to generate a token for the real PyPI.
+
+Then add it to your poetry config:
+
+```
+poetry config pypi-token.pypi XXXXXXXX
+```
+
+Now the make commands should work as expected.
+
 
 ## Dependencies
 

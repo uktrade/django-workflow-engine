@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "django-workflow-engine"
+version = "0.0.20"
+description = ""
+authors = ["Cameron Lamb <cameron.lamb@digital.trade.gov.uk>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "django_workflow_engine"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.group.testing]
+optional = true
+
+[tool.poetry.group.testing.dependencies]
+pytest-django = "^4.5.2"
+factory-boy = "^3.2.1"
+tox = "^4.4.6"
+
+[tool.poetry.group.utils]
+optional = true
+
+[tool.poetry.group.utils.dependencies]
+isort = "*"
+flake8 = "*"
+black = "*"
+mypy = "*"
+django-stubs = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
