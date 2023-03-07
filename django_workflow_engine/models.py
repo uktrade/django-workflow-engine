@@ -38,12 +38,11 @@ class Flow(models.Model):
         return lookup_workflow(self.workflow_name)
 
     @property
-    def current_task_record(self):
-        return self.tasks.filter(executed_at__isnull=True).first()
+    def current_task_status(self):
+        return self.tasks.filter(done=False, executed_at__isnull=True).first()
 
-    # TODO: rename
     @property
-    def nice_name(self):
+    def status(self):
         if self.is_complete:
             return "Completed"
         elif self.started:
@@ -53,22 +52,22 @@ class Flow(models.Model):
 
     @property
     def on_manual_step(self):
-        if not self.current_task_record:
+        if not self.current_task_status:
             return False
 
-        current_step = self.workflow.get_step(self.current_task_record.step_id)
+        current_step = self.workflow.get_step(self.current_task_status.step_id)
 
         if not current_step:
             return False
 
-        return not self.workflow.get_step(self.current_task_record.step_id).task.auto
+        return not self.workflow.get_step(self.current_task_status.step_id).task.auto
 
     @property
     def continue_url(self):
         return reverse("flow-continue", args=[self.pk])
 
 
-class TaskRecord(models.Model):
+class TaskStatus(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     started_at = models.DateTimeField(auto_now_add=True)
     executed_at = models.DateTimeField(null=True)
@@ -77,6 +76,7 @@ class TaskRecord(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+        related_name="tasks",
     )
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE, related_name="tasks")
     step_id = models.CharField(max_length=100)
@@ -94,8 +94,8 @@ class Target(models.Model):
         blank=True,
         null=True,
     )
-    task_record = models.ForeignKey(
-        TaskRecord,
+    task_status = models.ForeignKey(
+        TaskStatus,
         on_delete=models.CASCADE,
         related_name="targets",
     )
@@ -104,8 +104,36 @@ class Target(models.Model):
 class TaskLog(models.Model):
     logged_at = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=255)
-    task_record = models.ForeignKey(
-        TaskRecord,
+    task_status = models.ForeignKey(
+        TaskStatus,
         related_name="log",
         on_delete=models.CASCADE,
     )
+
+
+"""
+Old models kept for reference.
+"""
+
+
+class TaskRecordExecution(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    started_at = models.DateTimeField(auto_now_add=True)
+    executed_at = models.DateTimeField(null=True)
+    executed_by = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="task_executions",
+    )
+    flow = models.ForeignKey(
+        Flow, on_delete=models.CASCADE, related_name="task_executions"
+    )
+    step_id = models.CharField(max_length=100)
+    task_name = models.CharField(max_length=100)
+    task_info = models.JSONField(default=dict)
+    done = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.step_id} {self.task_name}"

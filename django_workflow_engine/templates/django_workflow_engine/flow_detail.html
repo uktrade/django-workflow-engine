@@ -17,30 +17,28 @@
     </dd>
   </div>
   {% if object.finished %}
-      <div>
-        <dt>
-          Finished?
-        </dt>
-        <dd>
-          {{ object.finished }}
-        </dd>
-      </div>
+    <div>
+      <dt>
+        Finished?
+      </dt>
+      <dd>
+        {{ object.finished }}
+      </dd>
+    </div>
   {% else %}
-  <div>
-    <dt>
-      Status
-    </dt>
-    <dd>
-      {{ object.nice_name }}
-    </dd>
-  </div>
+    <div>
+      <dt>
+        Status
+      </dt>
+      <dd>
+        {{ object.status }}
+      </dd>
+    </div>
   {% endif %}
 </dl>
-
-{% with next_task=object.current_task_record %}
-    {% if next_task and not next_task.auto %}
-        <a href="{% url 'flow-continue' object.pk %}">Continue</a>
-    {% endif %}
+{% with next_task=object.current_task_status %}
+  {% if next_task and not next_task.auto %}
+    <a href="{% url 'flow-continue' object.pk %}">Continue</a>
+  {% endif %}
 {% endwith %}
-
 {% include 'django_workflow_engine/flow_diagram.html' %}

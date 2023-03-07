@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.workflows import (
     pause_task_workflow,
@@ -24,19 +25,19 @@ def test_pause_task_workflows(mock_execute, settings):
         executor.run_flow(user=test_user)
 
         flow.refresh_from_db()
-        assert flow.tasks.count() == 3
+        assert flow.tasks.count() == 2
         assert not flow.is_complete
 
         executor.run_flow(user=test_user)
 
         flow.refresh_from_db()
-        assert flow.tasks.count() == 4
+        assert flow.tasks.count() == 2
         assert not flow.is_complete
 
         executor.run_flow(user=test_user)
 
         flow.refresh_from_db()
-        assert flow.tasks.count() == 5
+        assert flow.tasks.count() == 2
         assert not flow.is_complete
 
         mock_execute.return_value = ([], True)
@@ -44,5 +45,11 @@ def test_pause_task_workflows(mock_execute, settings):
         executor.run_flow(user=test_user)
 
         flow.refresh_from_db()
-        assert flow.tasks.count() == 6
+        assert flow.tasks.count() == 3
+        assert flow.is_complete
+
+        executor.run_flow(user=test_user)
+
+        flow.refresh_from_db()
+        assert flow.tasks.count() == 3
         assert flow.is_complete
