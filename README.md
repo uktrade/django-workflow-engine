@@ -17,9 +17,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add the built-in `django-workflow-engine` view urls to your project's `urls.
-py` as
-follows:
+Add the built-in `django-workflow-engine` view urls to your project's `urls.py` as follows:
 
 
 ```python
