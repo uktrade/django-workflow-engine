@@ -29,6 +29,8 @@ class Flow(models.Model):
     finished = models.DateTimeField(null=True, blank=True)
     flow_info = models.JSONField(default=dict)
 
+    tasks: models.BaseManager["TaskRecord"]
+
     @property
     def is_complete(self):
         return bool(self.finished)
@@ -83,6 +85,9 @@ class TaskRecord(models.Model):
     task_name = models.CharField(max_length=100)
     task_info = models.JSONField(default=dict)
     done = models.BooleanField(default=False)
+
+    targets: models.BaseManager["Target"]
+    log: models.BaseManager["TaskLog"]
 
     def __str__(self):
         return f"{self.step_id} {self.task_name}"
