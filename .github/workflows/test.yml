@@ -24,3 +24,5 @@ jobs:
           POETRY_VIRTUALENVS_CREATE: false
       - name: Run Tox
         run: poetry run tox
+      - name: Run type checking
+        run: poetry run mypy
