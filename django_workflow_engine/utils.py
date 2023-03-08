@@ -1,4 +1,6 @@
 """django_workflow_engine utils."""
+from typing import Dict, Type, Union, cast
+
 from django.conf import settings
 from django.utils.module_loading import import_string
 
@@ -53,10 +55,13 @@ def load_workflow(workflow_key) -> Workflow:
         class e.g: 'workflows.onboard_contractor.OnboardContractor'
     :returns (class): The workflow class.
     """
-    class_or_str = settings.DJANGO_WORKFLOWS[workflow_key]
+    workflows = cast(Dict[str, Union[Workflow, str]], settings.DJANGO_WORKFLOWS)
+    class_or_str = workflows[workflow_key]
 
-    if type(class_or_str) is not str:
+    if type(class_or_str) is Workflow:
         return class_or_str
+
+    assert type(class_or_str) is str
 
     try:
         return import_string(class_or_str)

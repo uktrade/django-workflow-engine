@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from django_workflow_engine.dataclass import Step
 from django_workflow_engine.models import Flow, TaskRecord
@@ -9,11 +9,13 @@ class PreviousTasksCompleteTask(Task):
     task_name = "previous_tasks_complete"
     auto = True
 
-    def execute(self, task_info):
+    def execute(self, task_info: Dict):
         task_record: TaskRecord = self.task_record
         flow: Flow = self.flow
 
-        leaver_complete_step: Step = flow.workflow.get_step(task_record.step_id)
+        leaver_complete_step = flow.workflow.get_step(task_record.step_id)
+
+        assert leaver_complete_step
 
         # Get all steps that point to the current step.
         previous_steps: List[Step] = [

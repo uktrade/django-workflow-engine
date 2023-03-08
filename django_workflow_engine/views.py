@@ -59,7 +59,6 @@ class FlowCreateForm(forms.ModelForm):
 class FlowCreateView(CreateView):
     model = Flow
     form_class = FlowCreateForm
-    object: Optional[Flow]
 
     def get_success_url(self) -> str:
         assert self.object
@@ -213,7 +212,7 @@ class EdgeData(TypedDict):
     data: Edge
 
 
-def workflow_to_cytoscape_elements(flow):
+def workflow_to_cytoscape_elements(flow: Flow):
     nodes: List[NodeData] = [
         {
             "data": step_to_node(flow, step),
