@@ -181,7 +181,9 @@ class WorkflowExecutor:
 
         # Get all TaskRecords that haven't been executed yet.
         for task in self.flow.tasks.filter(executed_at__isnull=True):
-            current_steps.append(self.flow.workflow.get_step(task.step_id))
+            step = self.flow.workflow.get_step(task.step_id)
+            if step:
+                current_steps.append(step)
 
         if not current_steps and not self.flow.started:
             # If there are no steps and the flow has never started, then start the flow from the first step.

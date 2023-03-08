@@ -1,4 +1,7 @@
+from typing import Any
+
 import pytest
+
 from django_workflow_engine.dataclass import Workflow
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.workflows import (
@@ -11,7 +14,7 @@ from django_workflow_engine.tests.workflows import (
 
 
 @pytest.mark.django_db
-def test_linear_workflow(settings):
+def test_linear_workflow(settings: Any):
     """
     There are no loops in the linear workflow.
     """
@@ -27,7 +30,7 @@ def test_linear_workflow(settings):
 
 
 @pytest.mark.django_db
-def test_split_workflow(settings):
+def test_split_workflow(settings: Any):
     """
     There are no loops in the split workflow.
     """
@@ -43,7 +46,7 @@ def test_split_workflow(settings):
 
 
 @pytest.mark.django_db
-def test_split_and_join_workflow(settings):
+def test_split_and_join_workflow(settings: Any):
     """
     There are no loops in the split and join workflow.
     """
@@ -59,7 +62,7 @@ def test_split_and_join_workflow(settings):
 
 
 @pytest.mark.django_db
-def test_reminder_workflow(settings):
+def test_reminder_workflow(settings: Any):
     """
     There is 1 loop in the reminder workflow.
     """
@@ -77,7 +80,7 @@ def test_reminder_workflow(settings):
 
 
 @pytest.mark.django_db
-def test_complex_loops_workflow(settings):
+def test_complex_loops_workflow(settings: Any):
     """
     There are 2 loops in the complex loops workflow.
     """
