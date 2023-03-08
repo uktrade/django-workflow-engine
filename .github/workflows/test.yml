@@ -25,4 +25,4 @@ jobs:
       - name: Run Tox
         run: poetry run tox
       - name: Run type checking
-        run: poetry run mypy
+        run: poetry run mypy . --exclude example_project
