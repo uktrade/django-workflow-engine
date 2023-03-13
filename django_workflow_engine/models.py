@@ -3,6 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models.manager import BaseManager
 from django.urls import reverse
 
 from django_workflow_engine.dataclass import Workflow
@@ -28,6 +29,8 @@ class Flow(models.Model):
     running = models.BooleanField(default=False)
     finished = models.DateTimeField(null=True, blank=True)
     flow_info = models.JSONField(default=dict)
+
+    tasks: BaseManager["TaskRecord"]
 
     @property
     def is_complete(self):
@@ -83,6 +86,9 @@ class TaskRecord(models.Model):
     task_name = models.CharField(max_length=100)
     task_info = models.JSONField(default=dict)
     done = models.BooleanField(default=False)
+
+    targets: BaseManager["Target"]
+    log: BaseManager["TaskLog"]
 
     def __str__(self):
         return f"{self.step_id} {self.task_name}"
