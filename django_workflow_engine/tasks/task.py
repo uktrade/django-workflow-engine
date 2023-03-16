@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Tuple, Type, Union
 
 if TYPE_CHECKING:
-    from django_workflow_engine.models import Flow, TaskRecord
+    from django_workflow_engine.models import Flow, TaskStatus
 
 
 class TaskError(Exception):
@@ -49,9 +49,9 @@ class Task(ABC):
         if not cls.abstract and cls.task_name:
             cls.tasks[cls.task_name] = cls
 
-    def __init__(self, user, task_record: "TaskRecord", flow: "Flow") -> None:
+    def __init__(self, user, task_status: "TaskStatus", flow: "Flow") -> None:
         self.user = user
-        self.task_record: "TaskRecord" = task_record
+        self.task_status: "TaskStatus" = task_status
         self.flow: "Flow" = flow
 
     def setup(self, task_info: Dict) -> None:
@@ -65,4 +65,4 @@ class Task(ABC):
         raise NotImplementedError
 
     def log(self, message: str) -> None:
-        self.task_record.log.create(message=message)
+        self.task_status.log.create(message=message)

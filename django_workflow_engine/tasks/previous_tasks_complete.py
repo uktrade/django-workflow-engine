@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from django_workflow_engine.dataclass import Step
-from django_workflow_engine.models import Flow, TaskRecord
+from django_workflow_engine.models import Flow, TaskStatus
 from django_workflow_engine.tasks.task import Task
 
 
@@ -10,10 +10,10 @@ class PreviousTasksCompleteTask(Task):
     auto = True
 
     def execute(self, task_info: Dict):
-        task_record: TaskRecord = self.task_record
+        task_status: TaskStatus = self.task_status
         flow: Flow = self.flow
 
-        leaver_complete_step = flow.workflow.get_step(task_record.step_id)
+        leaver_complete_step = flow.workflow.get_step(task_status.step_id)
 
         assert leaver_complete_step
 

@@ -6,7 +6,7 @@ creation, do not try to serve a site using this configuration.
 from pathlib import Path
 from typing import List
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY: str = "XXX"
 DEBUG: bool = True
 ALLOWED_HOSTS: List[str] = []

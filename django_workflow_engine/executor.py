@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from django_workflow_engine import COMPLETE
 from django_workflow_engine.exceptions import WorkflowError, WorkflowNotAuthError
-from django_workflow_engine.models import Target, TaskRecord
+from django_workflow_engine.models import Target, TaskStatus
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import User
@@ -101,14 +101,14 @@ class WorkflowExecutor:
         """
         break_flow: bool = False
 
-        task_record, _ = self.get_or_create_task_record(step=step)
+        task_status, _ = self.get_or_create_task_status(step=step)
 
         # Get the task for the current step
         step_task: Type["Task"] = step.task
         # Instantiate the Task
-        task = step_task(user, task_record, self.flow)
+        task = step_task(user, task_status, self.flow)
         # Setup the Task.
-        task.setup(task_record.task_info)
+        task.setup(task_status.task_info)
 
         # Check if this task is automatic or manual
         if not task.auto:
@@ -118,12 +118,12 @@ class WorkflowExecutor:
         self.check_authorised(user, step)
 
         # Execute the task
-        targets, task_done = task.execute(task_record.task_info)
+        targets, task_done = task.execute(task_status.task_info)
 
-        task_record.done = task_done
-        task_record.executed_by = user
-        task_record.executed_at = timezone.now()
-        task_record.save()
+        task_status.done = task_done
+        task_status.executed_by = user
+        task_status.executed_at = timezone.now()
+        task_status.save()
 
         if targets is None:
             targets = []
@@ -141,11 +141,11 @@ class WorkflowExecutor:
         if targets and targets != COMPLETE:
             for target in targets:
                 Target.objects.get_or_create(
-                    task_record=task_record, target_string=target
+                    task_status=task_status, target_string=target
                 )
             for workflow_step in self.flow.workflow.steps:
                 if workflow_step.step_id in targets:
-                    self.get_or_create_task_record(step=workflow_step)
+                    self.get_or_create_task_status(step=workflow_step)
 
         # Break the flow if this task is the last in a loop or if the task isn't done or if this step is in the target list.
         if (
@@ -157,20 +157,18 @@ class WorkflowExecutor:
 
         return break_flow
 
-    def get_or_create_task_record(self, step: "Step") -> Tuple[TaskRecord, bool]:
+    def get_or_create_task_status(self, step: "Step") -> Tuple[TaskStatus, bool]:
         """
-        Get or create a TaskRecord for a given Step.
+        Get or create a TaskStatus for a given Step.
         """
 
-        task_record, created = TaskRecord.objects.get_or_create(
+        task_status, created = TaskStatus.objects.get_or_create(
             flow=self.flow,
             task_name=step.task_name,
             step_id=step.step_id,
-            executed_by=None,
-            executed_at=None,
             defaults={"task_info": step.task_info or {}},
         )
-        return task_record, created
+        return task_status, created
 
     def get_current_steps(self) -> List["Step"]:
         """
@@ -180,7 +178,7 @@ class WorkflowExecutor:
         current_steps: List["Step"] = []
 
         # Get all TaskRecords that haven't been executed yet.
-        for task in self.flow.tasks.filter(executed_at__isnull=True):
+        for task in self.flow.tasks.filter(done=False):
             step = self.flow.workflow.get_step(task.step_id)
             if step:
                 current_steps.append(step)

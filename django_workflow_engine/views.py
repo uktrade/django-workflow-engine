@@ -19,7 +19,7 @@ from django_workflow_engine import COMPLETE
 from django_workflow_engine.dataclass import Step
 from django_workflow_engine.exceptions import WorkflowNotAuthError
 from django_workflow_engine.executor import WorkflowExecutor
-from django_workflow_engine.models import Flow, TaskRecord
+from django_workflow_engine.models import Flow, TaskStatus
 from django_workflow_engine.tasks import TaskError
 from django_workflow_engine.utils import build_workflow_choices
 
@@ -238,7 +238,7 @@ def workflow_to_cytoscape_elements(flow: Flow):
 
 
 def step_to_node(flow: Flow, step: Step) -> Node:
-    latest_step_task: Optional[TaskRecord] = (
+    latest_step_task: Optional[TaskStatus] = (
         flow.tasks.order_by("started_at").filter(step_id=step.step_id).last()
     )
 

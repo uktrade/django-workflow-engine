@@ -1,5 +1,6 @@
 import pytest
-from django_workflow_engine.models import TaskRecord
+
+from django_workflow_engine.models import TaskStatus
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.workflows import linear_workflow
 
@@ -12,7 +13,7 @@ def test_workflow_creation(settings):
     )
     executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 3
+    assert TaskStatus.objects.count() == 3
 
     correct_task_order = [
         "start",
@@ -20,5 +21,5 @@ def test_workflow_creation(settings):
         "task_b",
     ]
 
-    task_order = [task_record.step_id for task_record in TaskRecord.objects.all()]
+    task_order = [task_status.step_id for task_status in TaskStatus.objects.all()]
     assert task_order == correct_task_order

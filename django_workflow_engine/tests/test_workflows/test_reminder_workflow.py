@@ -1,7 +1,8 @@
 import logging
 
 import pytest
-from django_workflow_engine.models import TaskRecord
+
+from django_workflow_engine.models import TaskStatus
 from django_workflow_engine.tests.factories import UserFactory
 from django_workflow_engine.tests.utils import set_up_flow
 from django_workflow_engine.tests.workflows import reminder_workflow
@@ -19,30 +20,28 @@ def test_reminder_style_workflow(settings):
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
-    assert TaskRecord.objects.count() == 3
-    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
+    assert TaskStatus.objects.count() == 3
+    assert TaskStatus.objects.filter(done=True).count() == 1
 
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
-    assert TaskRecord.objects.count() == 4
-    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
+    assert TaskStatus.objects.count() == 3
+    assert TaskStatus.objects.filter(done=True).count() == 2
 
     executor.run_flow(user=test_user)
 
     assert not flow.is_complete
-    assert TaskRecord.objects.count() == 5
-    assert TaskRecord.objects.filter(executed_at__isnull=True).count() == 1
+    assert TaskStatus.objects.count() == 3
+    assert TaskStatus.objects.filter(done=True).count() == 2
 
     correct_task_order = [
         "start_reminder",
         "was_user_created",
         "remind_creator",
-        "was_user_created",
-        "remind_creator",
     ]
 
-    task_order = [task_record.step_id for task_record in TaskRecord.objects.all()]
+    task_order = [task_status.step_id for task_status in TaskStatus.objects.all()]
     assert task_order == correct_task_order
 
     # Create "Sam" user
@@ -52,10 +51,9 @@ def test_reminder_style_workflow(settings):
     while not flow.is_complete:
         executor.run_flow(user=test_user)
 
-    assert TaskRecord.objects.count() == 7
+    assert TaskStatus.objects.count() == 4
 
-    correct_task_order.append("was_user_created")
     correct_task_order.append("notify_creator")
 
-    task_order = [task_record.step_id for task_record in TaskRecord.objects.all()]
+    task_order = [task_status.step_id for task_status in TaskStatus.objects.all()]
     assert task_order == correct_task_order
