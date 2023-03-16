@@ -30,7 +30,7 @@ class Flow(models.Model):
     finished = models.DateTimeField(null=True, blank=True)
     flow_info = models.JSONField(default=dict)
 
-    tasks: BaseManager["TaskRecord"]
+    tasks: BaseManager["TaskStatus"]
 
     @property
     def is_complete(self):
@@ -140,6 +140,9 @@ class TaskRecordExecution(models.Model):
     task_name = models.CharField(max_length=100)
     task_info = models.JSONField(default=dict)
     done = models.BooleanField(default=False)
+
+    targets: BaseManager["TaskRecordExecutionTarget"]
+    log: BaseManager["TaskRecordExecutionTaskLog"]
 
     def __str__(self):
         return f"{self.step_id} {self.task_name}"
