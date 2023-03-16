@@ -5,8 +5,16 @@ from django.db import migrations
 def migrate_from_taskrecordexecutions(apps, schema_editor):
     Flow = apps.get_model("django_workflow_engine", "Flow")
     TaskStatus = apps.get_model("django_workflow_engine", "TaskStatus")
+    Target = apps.get_model("django_workflow_engine", "Target")
+    TaskLog = apps.get_model("django_workflow_engine", "TaskLog")
     TaskRecordExecution = apps.get_model(
         "django_workflow_engine", "TaskRecordExecution"
+    )
+    TaskRecordExecutionTarget = apps.get_model(
+        "django_workflow_engine", "TaskRecordExecutionTarget"
+    )
+    TaskRecordExecutionTaskLog = apps.get_model(
+        "django_workflow_engine", "TaskRecordExecutionTaskLog"
     )
 
     for flow in Flow.objects.all():
@@ -19,7 +27,7 @@ def migrate_from_taskrecordexecutions(apps, schema_editor):
                 .order_by("-started_at")
                 .first()
             )
-            TaskStatus.objects.create(
+            task_status = TaskStatus.objects.create(
                 flow=flow,
                 step_id=step.step_id,
                 started_at=task_execution.started_at,
@@ -29,6 +37,25 @@ def migrate_from_taskrecordexecutions(apps, schema_editor):
                 task_info=task_execution.task_info,
                 done=task_execution.done,
             )
+
+            # Create a new Target for each Target in the TaskRecordExecution
+            for target in TaskRecordExecutionTarget.objects.filter(
+                task_record=task_execution
+            ):
+                Target.objects.create(
+                    target_string=target.target_string,
+                    task_status=task_status,
+                )
+
+            # Create a new TaskLog for each TaskLog in the TaskRecordExecution
+            for task_log in TaskRecordExecutionTaskLog.objects.filter(
+                task_record=task_execution
+            ):
+                TaskLog.objects.create(
+                    logged_at=task_log.logged_at,
+                    message=task_log.message,
+                    task_status=task_log.task_status,
+                )
 
 
 class Migration(migrations.Migration):
