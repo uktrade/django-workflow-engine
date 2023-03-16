@@ -28,7 +28,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-workflow-engine"
-version = "0.1.0rc5"
+version = "0.1.0rc6"
 description = "Lightweight, reusable workflow engine for Django applications"
 category = "main"
 optional = false
