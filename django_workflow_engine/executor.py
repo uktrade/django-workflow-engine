@@ -137,7 +137,7 @@ class WorkflowExecutor:
                 # If the task is not done, then re-add the step to the targets.
                 targets.append(step.step_id)
 
-        # Create objects for the next tasks, generated after the current.
+        # Get/Create objects for the next tasks, generated after the current.
         if targets and targets != COMPLETE:
             for target in targets:
                 Target.objects.get_or_create(
@@ -145,7 +145,16 @@ class WorkflowExecutor:
                 )
             for workflow_step in self.flow.workflow.steps:
                 if workflow_step.step_id in targets:
-                    self.get_or_create_task_status(step=workflow_step)
+                    task_status, _ = self.get_or_create_task_status(step=workflow_step)
+                    # Unset the executed fields so that the task will be picked up again.
+                    task_status.executed_at = None
+                    task_status.executed_by = None
+                    task_status.save(
+                        update_fields=[
+                            "executed_at",
+                            "executed_by",
+                        ]
+                    )
 
         # Break the flow if this task is the last in a loop or if the task isn't done or if this step is in the target list.
         if (
@@ -178,7 +187,7 @@ class WorkflowExecutor:
         current_steps: List["Step"] = []
 
         # Get all TaskRecords that haven't been executed yet.
-        for task in self.flow.tasks.filter(done=False):
+        for task in self.flow.tasks.filter(executed_at__isnull=True):
             step = self.flow.workflow.get_step(task.step_id)
             if step:
                 current_steps.append(step)
