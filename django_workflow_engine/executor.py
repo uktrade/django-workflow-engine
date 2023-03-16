@@ -42,6 +42,12 @@ class WorkflowExecutor:
         self.flow.running = True
         self.flow.save(update_fields=["running"])
 
+        # Initialise runs starting for the first time.
+        if not self.flow.tasks.all().exists():
+            self.get_or_create_task_status(step=self.flow.workflow.first_step)
+            self.flow.started = timezone.now()
+            self.flow.save(update_fields=["started"])
+
         try:
             # Progress the workflow
             self.execute_steps(user=user)
@@ -191,12 +197,6 @@ class WorkflowExecutor:
             step = self.flow.workflow.get_step(task.step_id)
             if step:
                 current_steps.append(step)
-
-        if not current_steps and not self.flow.started:
-            # If there are no steps and the flow has never started, then start the flow from the first step.
-            current_steps.append(self.flow.workflow.first_step)
-            self.flow.started = timezone.now()
-            self.flow.save(update_fields=["started"])
 
         return current_steps
 
