@@ -106,6 +106,9 @@ class Target(models.Model):
         related_name="targets",
     )
 
+    class Meta:
+        unique_together = ("target_string", "task_status")
+
 
 class TaskLog(models.Model):
     logged_at = models.DateTimeField(auto_now_add=True)
