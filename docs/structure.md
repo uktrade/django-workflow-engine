@@ -1,6 +1,4 @@
-# Django Workflow Engine
-
-## Model structure
+# Model structure
 
 ```mermaid
 classDiagram
