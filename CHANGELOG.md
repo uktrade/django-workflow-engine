@@ -6,7 +6,9 @@
 - TaskRecord model has been removed.
 
 ### Data migrations
+
 This release removes models that you might have referenced in data migrations, you will need to update any of these migrations with the following `run_before` to ensure that your migrations can run successfully:
+
 ```python
 class Migration(migrations.Migration):
     ...
