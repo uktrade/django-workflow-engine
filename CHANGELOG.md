@@ -2,6 +2,7 @@
 
 ## 0.1.0
 
+- Add cleanup command to remove duplicate TaskRecords
 - TaskRecord model has been removed.
 
 ### Data migrations
