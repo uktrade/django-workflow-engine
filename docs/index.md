@@ -1,61 +1,93 @@
 # Django Workflow Engine
+`django-workflow-engine` is a lightweight and reusable workflow engine for
+Django applications. It enables you to better organise the business logic for
+collaborating users.
 
-## Model structure
+## Installation
 
-```mermaid
-classDiagram
-    TaskRecord <|-- TaskLog
-    TaskRecord <|-- Target
-    Flow <|-- TaskRecord
+    pip install django-workflow-engine
 
-    class Flow{
-        String workflow_name
-        String flow_name
-        Datetime started
-        Boolean running
-        Datetime finished
-        JSON flow_info
-    }
-    class TaskLog{
-        String message
-        Datetime logged_at
-    }
+## Getting started
+Add the application to your Django settings `INSTALLED_APPS` list:
 
-    class Target{
-        String target_string
-    }
-
-    class TaskRecord{
-        UUID uuid
-        Datetime started_at
-        Datetime executed_at
-        String step_id
-        String task_name
-        JSON task_info
-        Boolean done
-    }
+```python
+INSTALLED_APPS = [
+    ...
+    "django_workflow_engine",
+]
 ```
 
-## How are the models used?
+Add the built-in `django-workflow-engine` view urls to your project's `urls.py` as follows:
 
-### Flow
 
-The Flow model is used to store information about a workflow. You will need to create a new Flow object for each workflow you want to run.
+```python
+from django_workflow_engine import workflow_urls
+...
+urlpatterns = [
+    path("workflow/", workflow_urls()),
+    ...
+]
+```
 
-When executed, the Flow object will look at the workflow_name and follow the steps outlined on that workflow.
+This will utilise all `django-workflow-engine` built-in view classes. Default views are:
+- `list_view=FlowListView` List of workflow instances view.
+- `view=FlowView` Workflow instance view.
+- `create_view=FlowCreateView` Create workflow view.
+- `continue_view=FlowContinueView` Workflow continuation view.
+- `diagram_view=FlowDiagramView` Workflow diagram view.
 
-### TaskRecord
+You can override any the built-in view classes with your own, for example to
+provide your own view classes for flow list and flow view:
 
-The TaskRecord model is used to store information about workflow steps they are created when a step is executed.
+```python
+urlpatterns = [
+        path("workflow/",
+             workflow_urls(
+                 list_view=MyFlowListView,
+                 view=MyFlowView,
+            ),
+        ),
+    ]
+```
 
-Once the Step has finished executing, the TaskRecord is updated with the results of the execution.
+## Building your first workflow
 
-Currently, TaskRecord objects are created for each execution, meaning that if a step doesn't complete successfully, and is executed again, a new TaskRecord is created.
+Create a `workflows.py` in your project and add your uniquely named workflows.
 
-### Target
+```python
+from django_workflow_engine import Step, Workflow
 
-After a step has been executed a Targets are created that will determine which steps need to be executed next.
+onboard_contractor = Workflow(
+    name="onboard_contractor",
+    steps=[
+        Step(...),
+        Step(...),
+        Step(...),
+    ],
+)
 
-### TaskLog
+onboard_perm = Workflow(
+    name="onboard_perm",
+    steps=[
+        ...
+    ],
+)
+```
 
-TaskLogs are currently not used by Django Workflow Engine, but they can be useful for adding messages to TaskRecords.
+Add you workflows to your Django settings as follows:
+
+```python
+DJANGO_WORKFLOWS = {
+    "onboard_contractor": "your_app.workflows.onboard_contractor",
+    "onboard_perm": "your_app.workflows.onboard_perm",
+}
+```
+
+Each entry needs to be a valid module path where the final component is the
+name of your workflow class.
+
+Finally, run the `django-workflow-engine` migrations:
+
+```bash
+$ ./manage.py migrate
+```
