@@ -1,0 +1,73 @@
+# Project specific config:
+site_name: Django Workflow Engine
+site_url: https://uktrade.github.io/django-workflow-engine/
+repo_name: uktrade/django-workflow-engine
+repo_url: https://github.com/uktrade/django-workflow-engine/
+site_description: Documentation for the Django Workflow Engine
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/uktrade/django-workflow-engine/
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/django-workflow-engine/
+
+# Standard config:
+plugins:
+  - awesome-pages
+  - material/social:
+      cards_color:
+        fill: "#ffffff"
+        text: "#000000"
+      cards_font: "Roboto"
+  - material/search:
+      lang: en
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+
+theme:
+  name: tech_docs_template
+  language: en
+  features:
+    - content.code.copy
+    - header.autohide
+    - navigation.indexes
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+  logo: assets/dit-logo.png
+  favicon: assets/dit-favicon.png
+
+extra_javascript:
+  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js # /PS-IGNORE
+  - js/tablesort.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      linenums: null
+      anchor_linenums: true
+      use_pygments: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - tables
+
+dev_addr: "127.0.0.1:8001"

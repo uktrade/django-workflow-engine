@@ -17,3 +17,6 @@ push-pypi-test:
 
 push-pypi:
 	poetry publish
+
+serve-docs:
+	poetry run mkdocs serve -a localhost:8001
