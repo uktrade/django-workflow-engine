@@ -30,6 +30,7 @@ urlpatterns = [
 ```
 
 This will utilise all `django-workflow-engine` built-in view classes. Default views are:
+
 - `list_view=FlowListView` List of workflow instances view.
 - `view=FlowView` Workflow instance view.
 - `create_view=FlowCreateView` Create workflow view.

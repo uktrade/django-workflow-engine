@@ -3,11 +3,11 @@
 - [PyPI Package](https://pypi.org/project/django-workflow-engine/)
 - [Test PyPI Package](https://test.pypi.org/project/django-workflow-engine/)
 
-Running `make build-package` will build the package into the `dist/` directory.
+## Commands
 
-Running `make push-pypi-test` will push the built package to Test PyPI.
-
-Running `make push-pypi` will push the built package to PyPI.
+- Running `make build-package` will build the package into the `dist/` directory.
+- Running `make push-pypi-test` will push the built package to Test PyPI.
+- Running `make push-pypi` will push the built package to PyPI.
 
 ## Setting up poetry for pushing to PyPI
 
