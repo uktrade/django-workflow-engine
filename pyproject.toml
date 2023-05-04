@@ -4,7 +4,7 @@ version = "0.1.0rc7"
 description = ""
 authors = ["Cameron Lamb <cameron.lamb@digital.trade.gov.uk>"]
 license = "MIT"
-readme = "README.md"
+readme = "docs/index.md"
 packages = [{include = "django_workflow_engine"}]
 
 [tool.poetry.dependencies]
