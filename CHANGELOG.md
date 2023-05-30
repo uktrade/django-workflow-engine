@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.1.1
+
+- Update requests to 2.31.0
+- Update pymdown-extensions to 10.0.1
+
 ## 0.1.0
 
 - Add cleanup command to remove duplicate TaskRecords
