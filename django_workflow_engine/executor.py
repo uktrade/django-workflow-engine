@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, List, Tuple, Type
+from typing import TYPE_CHECKING, List, Optional, Tuple, Type
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -82,7 +82,14 @@ class WorkflowExecutor:
 
         # Execute the steps.
         for current_step in current_steps:
-            current_step_break_flow = self.execute_step(user=user, step=current_step)
+            try:
+                current_step_break_flow = self.execute_step(
+                    user=user, step=current_step
+                )
+            except Exception as e:
+                logger.exception(e)
+                current_step_break_flow = True
+
             # We want to toggle break_flow to True, but not back to False.
             if current_step_break_flow:
                 break_flow = True
