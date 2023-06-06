@@ -36,8 +36,10 @@ def test_parallel_path_no_join_with_error_workflow(settings):
         split_workflow,
     )
     executor.run_flow(user=test_user)
+    executor.run_flow(user=test_user)
 
     assert TaskStatus.objects.count() == 4
+    assert TaskStatus.objects.filter(done=True).count() == 3
 
     correct_task_order = [
         "start",
