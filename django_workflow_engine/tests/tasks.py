@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from django_workflow_engine.tasks.task import Task
 
 User = get_user_model()
@@ -24,6 +25,14 @@ class PauseTask(Task):
 
     def execute(self, task_info):
         return [], False
+
+
+class ErrorTask(Task):
+    task_name = "error_task"
+    auto = True
+
+    def execute(self, task_info):
+        raise Exception("Error")
 
 
 class SelfReferencingPauseTask(Task):

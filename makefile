@@ -2,7 +2,7 @@ setup:
 	poetry install --with=testing,utils,docs
 
 test:
-	poetry run pytest
+	poetry run pytest $(test)
 
 venv:
 	python3 -m venv test
