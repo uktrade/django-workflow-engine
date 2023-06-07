@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.0
+
+- Update logic to break on a failing task, but also execute any other tasks that aren't failing.
+
 ## 0.1.1
 
 - Update requests to 2.31.0
@@ -7,7 +11,7 @@
 
 ## 0.1.0
 
-- Add cleanup command to remove duplicate TaskRecords
+- Add cleanup command to remove duplicate TaskRecords.
 - TaskRecord model has been removed.
 
 ### Data migrations

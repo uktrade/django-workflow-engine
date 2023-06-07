@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "django_workflow_engine_example_project"
-version = "0.1.1"
+version = "0.2.0"
 description = ""
-authors = ["Sam Dudley <samuel.dudley@digital.trade.gov.uk>"]
+authors = [
+    "Sam Dudley <samuel.dudley@digital.trade.gov.uk>",
+    "Cam Lamb <cameron.lamb@digital.trade.gov.uk>",
+]
 license = "MIT"
 
 [tool.poetry.dependencies]
