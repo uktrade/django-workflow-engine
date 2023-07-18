@@ -3,7 +3,7 @@ from django_workflow_engine.dataclass import Step, Workflow
 from django_workflow_engine.tasks.previous_tasks_complete import (
     PreviousTasksCompleteTask,
 )
-from django_workflow_engine.tests.tasks import BasicTask, PauseTask
+from django_workflow_engine.tests.tasks import BasicTask, InvalidTargetTask, PauseTask
 
 """
 Test workflow definitions
@@ -275,6 +275,29 @@ complex_loops_workflow = Workflow(
         ),
         Step(
             step_id="end",
+            task_name=BasicTask.task_name,
+            targets=COMPLETE,
+        ),
+    ],
+)
+
+
+invalid_task_target_workflow = Workflow(
+    name="invalid_task_target_workflow",
+    steps=[
+        Step(
+            step_id="start",
+            task_name=BasicTask.task_name,
+            start=True,
+            targets=["task_a"],
+        ),
+        Step(
+            step_id="task_a",
+            task_name=InvalidTargetTask.task_name,
+            targets=["task_b"],
+        ),
+        Step(
+            step_id="task_b",
             task_name=BasicTask.task_name,
             targets=COMPLETE,
         ),
