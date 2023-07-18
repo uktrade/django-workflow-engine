@@ -156,12 +156,11 @@ class WorkflowExecutor:
                 Target.objects.get_or_create(
                     task_status=task_status, target_string=target
                 )
-                # Unset the executed fields so that the task will be picked up again.
-
                 workflow_step = self.flow.workflow.get_step(step_id=target)
                 if not workflow_step:
                     raise WorkflowError(f"Step '{target}' not found in workflow")
                 next_task_status, _ = self.get_or_create_task_status(step=workflow_step)
+                # Unset the executed fields so that the task will be picked up again.
                 next_task_status.executed_at = None
                 next_task_status.executed_by = None
                 next_task_status.save(
