@@ -5,7 +5,7 @@ with open("docs/index.md", "r") as fh:
 
 setup(
     name="django-workflow-engine",
-    version="0.2.0",
+    version="0.2.1",
     packages=find_packages(),
     include_package_data=True,
     author="DIT Live Service Team",

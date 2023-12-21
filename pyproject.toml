@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "django-workflow-engine"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = [
     "Cameron Lamb <cameron.lamb@digital.trade.gov.uk>",
-    "Ross Miller <ross.miller@digital.trade.gov.uk>"
+    "Ross Miller <ross.miller@digital.trade.gov.uk>",
 ]
 license = "MIT"
 readme = "docs/index.md"
-packages = [{include = "django_workflow_engine"}]
+packages = [{ include = "django_workflow_engine" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"

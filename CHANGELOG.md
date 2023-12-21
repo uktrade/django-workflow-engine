@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.1
+
+- Raise an exception if a task tries to trigger an invalid target (step_id)
+
 ## 0.2.0
 
 - Update logic to break on a failing task, but also execute any other tasks that aren't failing.
