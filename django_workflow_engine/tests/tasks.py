@@ -86,3 +86,11 @@ class WasUserCreatedTaskB(Task):
             return ["task_b_remind_creator"], False
 
         return ["task_b_notify_creator"], True
+
+
+class InvalidTargetTask(Task):
+    task_name = "invalid_target_task"
+    auto = True
+
+    def execute(self, task_info):
+        return ["not_a_real_step_id"], True

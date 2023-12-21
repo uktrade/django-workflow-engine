@@ -156,18 +156,19 @@ class WorkflowExecutor:
                 Target.objects.get_or_create(
                     task_status=task_status, target_string=target
                 )
-            for workflow_step in self.flow.workflow.steps:
-                if workflow_step.step_id in targets:
-                    task_status, _ = self.get_or_create_task_status(step=workflow_step)
-                    # Unset the executed fields so that the task will be picked up again.
-                    task_status.executed_at = None
-                    task_status.executed_by = None
-                    task_status.save(
-                        update_fields=[
-                            "executed_at",
-                            "executed_by",
-                        ]
-                    )
+                workflow_step = self.flow.workflow.get_step(step_id=target)
+                if not workflow_step:
+                    raise WorkflowError(f"Step '{target}' not found in workflow")
+                next_task_status, _ = self.get_or_create_task_status(step=workflow_step)
+                # Unset the executed fields so that the task will be picked up again.
+                next_task_status.executed_at = None
+                next_task_status.executed_by = None
+                next_task_status.save(
+                    update_fields=[
+                        "executed_at",
+                        "executed_by",
+                    ]
+                )
 
         # Break the flow if this task is the last in a loop or if the task isn't done or if this step is in the target list.
         if (
