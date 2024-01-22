@@ -28,7 +28,7 @@ def test_previous_tasks_complete_task(settings):
     end_task = flow.tasks.filter(step_id=end.step_id).last()
     assert not end_task.done
 
-    task, _ = executor.get_or_create_task_status(step=start)
+    task, _ = executor.update_or_create_task_status(step=start)
     task.done = True
     task.save()
 
@@ -38,7 +38,7 @@ def test_previous_tasks_complete_task(settings):
     end_task = flow.tasks.filter(step_id=end.step_id).last()
     assert not end_task.done
 
-    task, _ = executor.get_or_create_task_status(step=task_a)
+    task, _ = executor.update_or_create_task_status(step=task_a)
     task.done = True
     task.save()
 
@@ -48,7 +48,7 @@ def test_previous_tasks_complete_task(settings):
     end_task = flow.tasks.filter(step_id=end.step_id).last()
     assert not end_task.done
 
-    task, _ = executor.get_or_create_task_status(step=task_b)
+    task, _ = executor.update_or_create_task_status(step=task_b)
     task.done = True
     task.save()
 

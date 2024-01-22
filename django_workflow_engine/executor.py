@@ -44,7 +44,7 @@ class WorkflowExecutor:
 
         # Initialise runs starting for the first time.
         if not self.flow.tasks.all().exists():
-            self.get_or_create_task_status(step=self.flow.workflow.first_step)
+            self.update_or_create_task_status(step=self.flow.workflow.first_step)
             self.flow.started = timezone.now()
             self.flow.save(update_fields=["started"])
 
@@ -114,7 +114,7 @@ class WorkflowExecutor:
         """
         break_flow: bool = False
 
-        task_status, _ = self.get_or_create_task_status(step=step)
+        task_status, _ = self.update_or_create_task_status(step=step)
 
         # Get the task for the current step
         step_task: Type["Task"] = step.task
@@ -159,7 +159,9 @@ class WorkflowExecutor:
                 workflow_step = self.flow.workflow.get_step(step_id=target)
                 if not workflow_step:
                     raise WorkflowError(f"Step '{target}' not found in workflow")
-                next_task_status, _ = self.get_or_create_task_status(step=workflow_step)
+                next_task_status, _ = self.update_or_create_task_status(
+                    step=workflow_step
+                )
                 # Unset the executed fields so that the task will be picked up again.
                 next_task_status.executed_at = None
                 next_task_status.executed_by = None
@@ -180,17 +182,19 @@ class WorkflowExecutor:
 
         return break_flow
 
-    def get_or_create_task_status(self, step: "Step") -> Tuple[TaskStatus, bool]:
+    def update_or_create_task_status(self, step: "Step") -> Tuple[TaskStatus, bool]:
         """
-        Get or create a TaskStatus for a given Step.
+        Update or create a TaskStatus for a given Step.
+        Also updates the task_info if it has changed.
         """
 
-        task_status, created = TaskStatus.objects.get_or_create(
+        task_status, created = TaskStatus.objects.update_or_create(
             flow=self.flow,
             task_name=step.task_name,
             step_id=step.step_id,
             defaults={"task_info": step.task_info or {}},
         )
+
         return task_status, created
 
     def get_current_steps(self) -> List["Step"]:
