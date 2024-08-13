@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.2.2
+
+- Update django to 4.2.15
+- Update jinja2 to 3.1.4
+- Update requests to 2.32.2
+- Update zipp to 3.19.1
+- Update certifi to 2024.7.4
+- Update urllib3 to 1.26.19
+- Update black to 24.4.2
+- Update pillow to 10.4.0
+- Update idna to 3.7
+- Update sqlparse to 0.5.1
+
 ## 0.2.1
 
 - Raise an exception if a task tries to trigger an invalid target (step_id)

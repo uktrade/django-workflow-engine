@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django_workflow_engine_example_project"
-version = "0.2.1"
+version = "0.2.2"
 description = ""
 authors = [
     "Sam Dudley <samuel.dudley@digital.trade.gov.uk>",
